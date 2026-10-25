@@ -11,3 +11,8 @@
 .pb-mlabel { display: inline; }
 @media (max-width: 1180px) { .pb-mlabel { display: none; } }
 @media (max-width: 560px) { .if-width, .if-reload { display: none; } .pb-bar { flex-wrap: nowrap; gap: 6px; } .pb-bar .pb-select { max-width: 104px; min-width: 0; } .pb-seg button { padding: 5px 7px; } }
+.if-edge {
+  position: absolute; transform: translateX(-50%); z-index: 12; height: 28px; padding: 0 12px; border-radius: 999px; border: 0;
+  background: var(--accent); color: var(--on-accent); font: 600 12px var(--font); cursor: pointer; box-shadow: 0 4px 14px rgba(0, 0, 0, .22);
+}
+.if-edge.down { bottom: 70px; }

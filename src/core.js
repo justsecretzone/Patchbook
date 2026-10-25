@@ -13,7 +13,7 @@ const PB = (() => {
       placeholder: "Was soll sich ändern?", general: "Allgemein", browse: "Ansehen", comment: "Kommentieren",
       emptyOpen: "Noch keine Patches. Tippe auf Kommentieren und dann auf eine Stelle.", tapSpot: "Tippe auf eine Stelle",
       emptyOpenTime: "Noch keine Patches. Einfach oben tippen, der Zeitstempel kommt automatisch.",
-      emptyDone: "Noch nichts erledigt.", otherPages: "+{n} auf anderen Seiten", otherImages: "+{n} auf anderen Bildern", thisPageOnly: "Nur diese Seite", thisImageOnly: "Nur dieses Bild",
+      emptyDone: "Noch nichts erledigt.", dictate: "Diktieren", dictateStop: "Diktieren beenden", dictateMac: "Mikrofon ist hier nicht verfügbar. Nutze die Mac-Diktierfunktion (z. B. zweimal Fn).", dictateMobile: "Mikrofon ist hier nicht verfügbar. Nutze das Mikrofon deiner Tastatur.", dictateOther: "Mikrofon ist hier nicht verfügbar. Nutze die Diktierfunktion deines Systems.", otherPages: "+{n} auf anderen Seiten", otherImages: "+{n} auf anderen Bildern", thisPageOnly: "Nur diese Seite", thisImageOnly: "Nur dieses Bild",
       attach: "Screenshot anhängen", drop: "Screenshot hier ablegen", local: "Patches bleiben in diesem Browser.",
       readonly: "Nur Lesen. Zum Kommentieren braucht es Bearbeitungsrechte.",
       handoff: "Fertig? Schreib Claude:", handoffText: "Patches abarbeiten", handoffLocal: "Fertig? Kopieren und in den Chat einfügen:", copyPatches: "Patches kopieren", shotNote: "Screenshot im Chat anhängen", copied: "Kopiert", copy: "Kopieren",
@@ -31,7 +31,7 @@ const PB = (() => {
       placeholder: "What should change?", general: "General", browse: "Browse", comment: "Comment",
       emptyOpen: "No patches yet. Tap Comment, then tap a spot.", tapSpot: "Tap a spot",
       emptyOpenTime: "No patches yet. Just type above, the timestamp is added for you.",
-      emptyDone: "Nothing done yet.", otherPages: "+{n} on other pages", otherImages: "+{n} on other images", thisPageOnly: "This page only", thisImageOnly: "This image only",
+      emptyDone: "Nothing done yet.", dictate: "Dictate", dictateStop: "Stop dictation", dictateMac: "The microphone isn't available here. Use Mac dictation (e.g. press Fn twice).", dictateMobile: "The microphone isn't available here. Use your keyboard's microphone.", dictateOther: "The microphone isn't available here. Use your system's dictation.", otherPages: "+{n} on other pages", otherImages: "+{n} on other images", thisPageOnly: "This page only", thisImageOnly: "This image only",
       attach: "Attach screenshot", drop: "Drop screenshot here", local: "Patches stay in this browser.",
       readonly: "Read only. Commenting needs edit access.",
       handoff: "Done? Say:", handoffText: "Work through the patches", handoffLocal: "Done? Copy and paste into the chat:", copyPatches: "Copy patches", shotNote: "attach the screenshot in the chat", copied: "Copied", copy: "Copy",
@@ -57,6 +57,7 @@ const PB = (() => {
     dot: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="6"/></svg>',
     panel: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M15 4v16"/></svg>',
     chev: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg>',
+    mic: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg>',
     x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
     trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>',
     up: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg>',
@@ -171,6 +172,7 @@ const PB = (() => {
   // ---------- writes ----------
   async function addPatch() {
     if (S.readonly) return;
+    stopMic();
     const text = ui.ta.value.trim();
     const shots = S.draft.shots.filter((s) => !s.pending);
     if (!text && !shots.length) return;
@@ -199,19 +201,22 @@ const PB = (() => {
     el.addEventListener("pointerdown", (e) => {
       if (e.button) return;
       e.stopPropagation(); e.preventDefault();
-      const sx = e.clientX, sy = e.clientY; let moved = false;
+      const sx = e.clientX, sy = e.clientY; let moved = false, ended = false, guard = 0;
       try { el.setPointerCapture(e.pointerId); } catch {}
+      // Never leave S.dragging stuck: a lost capture or a silent pointer ends the drag.
+      const arm = () => { clearTimeout(guard); guard = setTimeout(() => finish({ type: "timeout" }), 4000); };
       const mv = (ev) => {
         if (!moved && Math.hypot(ev.clientX - sx, ev.clientY - sy) < 4) return;
         if (!moved) { moved = true; S.dragging = true; el.classList.add("dragging"); }
-        ev.preventDefault(); onMove(ev);
+        arm(); ev.preventDefault(); onMove(ev);
       };
-      const up = (ev) => {
-        el.removeEventListener("pointermove", mv); el.removeEventListener("pointerup", up); el.removeEventListener("pointercancel", up);
+      const finish = (ev) => {
+        if (ended) return; ended = true; clearTimeout(guard);
+        for (const [t, f] of [["pointermove", mv], ["pointerup", finish], ["pointercancel", finish], ["lostpointercapture", finish]]) el.removeEventListener(t, f);
         el.classList.remove("dragging"); S.dragging = false;
-        if (moved && ev.type === "pointerup") onDrop(ev); else if (!moved) onClick && onClick(); else changed();
+        if (moved && ev.type === "pointerup") onDrop(ev); else if (!moved && ev.type === "pointerup") onClick && onClick(); else changed();
       };
-      el.addEventListener("pointermove", mv); el.addEventListener("pointerup", up); el.addEventListener("pointercancel", up);
+      el.addEventListener("pointermove", mv); el.addEventListener("pointerup", finish); el.addEventListener("pointercancel", finish); el.addEventListener("lostpointercapture", finish);
     });
     el.addEventListener("click", (e) => { e.stopPropagation(); e.preventDefault(); });
   }
@@ -317,12 +322,13 @@ const PB = (() => {
     ui.dshots = h("div", { class: "pb-dshots", hidden: true });
     ui.ta = h("textarea", { class: "pb-ta", id: "pb-text", rows: "1", placeholder: t("placeholder"), "aria-label": t("placeholder") });
     ui.file = h("input", { type: "file", accept: "image/*", multiple: true, hidden: true, id: "pb-file", onchange: (e) => { attach([...e.target.files]); e.target.value = ""; } });
+    ui.mic = h("button", { class: "pb-ibtn pb-mic", title: t("dictate"), "aria-label": t("dictate"), html: I.mic, onclick: toggleMic });
     ui.send = h("button", { class: "pb-send", title: t("send"), "aria-label": t("send"), html: I.up, onclick: addPatch });
     const extra = O.composerExtra ? O.composerExtra() : null;
     ui.compose = h("div", { class: "pb-compose" }, ui.ctx, ui.dshots,
       h("div", { class: "pb-crow" }, ui.ta,
         h("button", { class: "pb-ibtn", title: t("attach"), "aria-label": t("attach"), html: I.image, onclick: () => ui.file.click() }),
-        extra, ui.send), ui.file);
+        ui.mic, extra, ui.send), ui.file);
     const copyBtn = h("button", { class: "pb-ibtn", title: t("copy"), "aria-label": t("copy"), html: I.copy, onclick: () => copy(t("handoffText")) });
     ui.handoffLabel = h("span", { text: t("handoff") });
     ui.handoffCode = h("code", { text: t("handoffText") });
@@ -354,6 +360,32 @@ const PB = (() => {
     ui.toggle.title = ui.toggle.ariaLabel = S.collapsed ? t("expand") : t("collapse");
     if (!silent) try { localStorage.setItem("pb-collapsed-" + CFG.kind, S.collapsed ? "1" : "0"); } catch {}
     if (!S.collapsed && S.sel) setTimeout(() => { const el = ui.list.querySelector(`[data-id="${CSS.escape(S.sel)}"]`); el && el.scrollIntoView({ block: "nearest" }); }, 60);
+  }
+  // ---------- dictation ----------
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let rec = null, recBase = "";
+  const speechLang = () => ({ de: "de-DE", en: "en-US" }[lang] || CFG.lang || navigator.language || "en-US");
+  function dictateHint() {
+    const ua = navigator.userAgent || "";
+    toast(/iPhone|iPad|Android/i.test(ua) ? t("dictateMobile") : /Mac/i.test(navigator.platform || ua) ? t("dictateMac") : t("dictateOther"), 4500);
+    ui.ta.focus();
+  }
+  function setMicOn(on) { ui.mic.classList.toggle("on", on); ui.mic.title = ui.mic.ariaLabel = on ? t("dictateStop") : t("dictate"); }
+  function stopMic() { if (rec) try { rec.stop(); } catch {} }
+  function toggleMic() {
+    if (rec) return stopMic();
+    if (!SR) return dictateHint();
+    try { rec = new SR(); } catch { rec = null; return dictateHint(); }
+    rec.lang = speechLang(); rec.interimResults = true; rec.continuous = true;
+    recBase = ui.ta.value.trim() ? ui.ta.value.replace(/\s*$/, " ") : "";
+    rec.onresult = (e) => {
+      let text = "";
+      for (let i = 0; i < e.results.length; i++) text += e.results[i][0].transcript;
+      ui.ta.value = recBase + text.trimStart(); autosize(); updateSend(); O.onTyping && O.onTyping();
+    };
+    rec.onerror = (e) => { if (/not-allowed|service-not-allowed|audio-capture|network/.test(e.error)) dictateHint(); };
+    rec.onend = () => { rec = null; setMicOn(false); };
+    try { rec.start(); setMicOn(true); ui.ta.focus(); O.onTyping && O.onTyping(); } catch { rec = null; setMicOn(false); dictateHint(); }
   }
   function autosize() { ui.ta.style.height = "0px"; ui.ta.style.height = Math.max(20, Math.min(160, ui.ta.scrollHeight - 10)) + "px"; }
   function renderTabs() {
@@ -449,9 +481,9 @@ const PB = (() => {
 
   // ---------- helpers ----------
   let toastTimer;
-  function toast(msg) {
+  function toast(msg, ms) {
     let el = $(".pb-toast"); if (!el) { el = h("div", { class: "pb-toast", role: "status" }); document.body.append(el); }
-    el.textContent = msg; el.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => (el.hidden = true), 2200);
+    el.textContent = msg; el.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => (el.hidden = true), ms || 2200);
   }
   function lightbox(src) {
     const lb = h("div", { class: "pb-lightbox", onclick: () => lb.remove() }, h("img", { src, alt: "" }));

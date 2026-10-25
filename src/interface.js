@@ -29,7 +29,9 @@
   frame.append(iframe, catcher, pointLayer);
   const imgHost = h("div", { class: "if-img", hidden: true });
   const empty = h("div", { class: "pb-placeholder", hidden: true }, h("b", { text: L.noPages }), t("noSourceHint"));
-  area.append(frame, imgHost, empty);
+  // Pins scrolled out of view: small pills at the top and bottom edge that jump to them.
+  const edgeUp = h("button", { class: "if-edge up", hidden: true }), edgeDown = h("button", { class: "if-edge down", hidden: true });
+  area.append(frame, imgHost, empty, edgeUp, edgeDown);
   stage.append(bar, area);
 
   // ---------- breakpoints ----------
@@ -292,7 +294,8 @@
         pinsBox.append(el);
       }
       if (d) { const pos = docPos(d), el = PB.pin(0, "draft", false, { left: pos.x + "px", top: pos.y + "px" }); makeDraggable(el, null); pinsBox.append(el); }
-    }
+      edges(list);
+    } else edges([]);
     pointLayer.textContent = "";
     if (pointMode && S.mode === "comment") {
       for (const p of list) { const el = PB.pin(p.n, p.status, S.sel === p.id, { left: p.anchor.x + "px", top: p.anchor.y + "px" }); el.addEventListener("click", () => PB.select(p.id, false)); pointLayer.append(el); }
@@ -304,6 +307,22 @@
     const a = { page: view ? view.src : "", bp: bp.name, vw: frame.offsetWidth, x: Math.round((e.clientX - r.left) / s), y: Math.round((e.clientY - r.top) / s), viewport: true };
     PB.setDraft(a, label(a));
   });
+  function edges(list) {
+    if (!fwin || (view && view.type !== "page")) { edgeUp.hidden = edgeDown.hidden = true; return; }
+    const top = fwin.scrollY, bottom = top + fwin.innerHeight, up = [], down = [];
+    for (const p of list) { const y = docPos(p.anchor).y; if (y < top + 8) up.push(y); else if (y - 26 > bottom - 8) down.push(y); }
+    const set = (btn, ys, arrow, pick) => {
+      btn.hidden = !ys.length; if (!ys.length) return;
+      btn.textContent = arrow + " " + ys.length;
+      btn.onclick = () => fwin.scrollTo({ top: Math.max(0, pick(ys) - fwin.innerHeight / 3), behavior: "smooth" });
+    };
+    set(edgeUp, up, "↑", (ys) => Math.max(...ys));
+    set(edgeDown, down, "↓", (ys) => Math.min(...ys));
+    const fr = frame.getBoundingClientRect(), ar = area.getBoundingClientRect();
+    edgeUp.style.top = Math.max(8, fr.top - ar.top + 10) + "px";
+    edgeDown.style.bottom = Math.max(0, ar.bottom - fr.bottom) + 72 + "px";
+    edgeUp.style.left = edgeDown.style.left = (fr.left - ar.left + fr.width / 2) + "px";
+  }
   function setMode(m) {
     catcher.hidden = !(pointMode && m === "comment");
     if (fdoc) {

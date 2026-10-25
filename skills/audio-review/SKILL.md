@@ -26,6 +26,8 @@ Everything in the page is minimal and monochrome so it sits naturally next to Cl
 - **Patches** panel: Open / Done with counts, numbered patches matching the pins, check to close, trash twice to delete, double-click to edit. For websites, apps, images and PDFs it is a sidebar on the right that collapses to a slim rail with the open count (on phones a bottom sheet that collapsed shows only the input). For audio and video there is no sidebar: the input sits right under the timeline and the patches list below it.
 - Patches stay where they were made: the list shows the patches of the current page, screen or image, with a link to the ones elsewhere. General patches without a spot show everywhere.
 - Pins and marked areas on the work can be dragged to a new spot (website, app, image, PDF, screenshots). The patch saves its new anchor on release; on websites and apps it re-attaches to the element under the new spot, on PDFs it captures the text there again.
+- Dictation: the microphone button writes speech straight into the field where the browser allows it. Claude's artifact frame currently blocks the microphone, so there the button points to the system dictation (Mac: Fn twice, phones: the keyboard microphone), which types into the field too.
+- On websites and apps, small "↑ 2" / "↓ 1" pills show pins that are scrolled out of view and jump to them.
 - Composer: a context line (where the patch sits, with a pin icon), attached screenshots, the text field, and a tool row with the send button. Enter saves.
 - Screenshots everywhere: paste (Cmd/Ctrl+V), drag onto the composer, or the image button. They upload to the artifact's asset store and travel with the patch.
 - A hint row telling the user what to say in chat when they're done ("Patches abarbeiten").
