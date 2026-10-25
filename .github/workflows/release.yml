@@ -1,11 +1,11 @@
 name: Release skills
 
 # Builds one zip per skill plus patchbook-skills.zip and publishes them as a GitHub release.
-# Runs on every push to main that touches the skills, and by hand from the Actions tab.
+# Runs when the version in .claude-plugin/plugin.json changes, and by hand from the Actions tab.
 on:
   push:
     branches: [main]
-    paths: ["skills/**", ".claude-plugin/plugin.json", ".github/workflows/release.yml"]
+    paths: [".claude-plugin/plugin.json", ".github/workflows/release.yml"]
   workflow_dispatch:
 
 permissions:
@@ -60,5 +60,5 @@ jobs:
             - **Claude Code:** `/plugin marketplace add justsecretzone/Patchbook`, then `/plugin install patchbook@patchbook`.
             - **ChatGPT (Business, Enterprise, Edu):** Plugins → Skills → Create → Upload from your computer. Patches stay in the browser there; use **Copy patches** to hand them back.
 
-            Full guide in the [README](https://github.com/justsecretzone/Patchbook#install).
+            Full guide in the [README](https://github.com/justsecretzone/Patchbook#install). What changed: [CHANGELOG](https://github.com/justsecretzone/Patchbook/blob/main/CHANGELOG.md).
           files: dist/*.zip

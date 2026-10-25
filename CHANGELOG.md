@@ -1,0 +1,15 @@
+# Changelog
+
+## 1.1.0
+
+- Dictation: a microphone button writes speech straight into the comment field where the browser allows it. Inside Claude's artifact frame, where the microphone is blocked, it points to the system dictation instead.
+- Patches stay on the page, screen or image they were made on. A link under the list shows the ones elsewhere.
+- Pills at the top and bottom edge show pins that are scrolled out of view and jump to them.
+- Dragging a pin can no longer leave the page in a state where pins stop showing.
+
+## 1.0.0
+
+- Six review skills: website, app, image, PDF, audio and video.
+- Pins on live elements with breakpoints, draggable pins and areas, screenshots on every patch.
+- Patches sidebar where you comment on a surface, a list under the player for audio and video.
+- Follows the user's language and Claude's light or dark theme. Local mode with "Copy patches" outside Claude.
