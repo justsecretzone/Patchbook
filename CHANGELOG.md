@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.1
+
+- Removed the dictation button. Claude's artifact frame blocks the microphone, so it could not work inside Claude. System dictation (Mac: Fn twice, phones: keyboard microphone) still types into the comment field.
+
 ## 1.1.0
 
 - Dictation: a microphone button writes speech straight into the comment field where the browser allows it. Inside Claude's artifact frame, where the microphone is blocked, it points to the system dictation instead.

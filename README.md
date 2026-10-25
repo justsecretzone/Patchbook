@@ -49,7 +49,6 @@ Giving feedback on generated work in a chat is clumsy: "the second button in the
 
 - **Comment where it is.** Pins sit on the element, the spot or the moment. Drag a pin to move it; on websites it re-attaches to the element underneath.
 - **Screenshots everywhere.** Paste, drop or attach images to any patch. On websites, apps and images you can import a screenshot as its own board and pin patches on it.
-- **Speak instead of typing.** A microphone button dictates straight into the comment where the browser allows it, and points to your system dictation inside Claude.
 - **Nothing gets lost.** Patches stay on the page they were made on, and small pills show pins that are scrolled out of view.
 - **Claude works through them.** Patches show "Claude is on it" while it works, then move to Done with a one-line reply.
 - **The work gets the space.** A collapsible sidebar where you comment on a surface, a list under the player for audio and video, a bottom sheet on phones, one floating Comment button.
