@@ -1,0 +1,125 @@
+<title>Image Review</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/*@core.css*/
+.im-area { position: relative; flex: 1; min-height: 0; display: flex; }
+.im-name { font-size: 13px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; max-width: 32ch; }
+.im-strip { display: flex; gap: 8px; padding: 8px 10px; border-top: 1px solid var(--line); overflow-x: auto; flex: none; }
+.im-thumb {
+  position: relative; flex: none; width: 72px; height: 54px; border-radius: 8px; overflow: hidden; padding: 0; cursor: pointer;
+  border: 1px solid var(--line); background: var(--panel);
+}
+.im-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.im-thumb[aria-current="true"] { box-shadow: 0 0 0 2px var(--accent); border-color: transparent; }
+.im-thumb .im-count {
+  position: absolute; right: 4px; top: 4px; min-width: 16px; height: 16px; border-radius: 8px; padding: 0 4px; box-sizing: border-box;
+  background: var(--accent); color: var(--on-accent); font: 600 9.5px/16px var(--font); text-align: center;
+}
+.im-add { display: grid; place-items: center; color: var(--muted); border-style: dashed; }
+.im-add svg { width: 18px; height: 18px; }
+.pb-mlabel { display: inline; }
+@media (max-width: 1180px) { .pb-mlabel { display: none; } }
+</style>
+<div id="pb-app"><main class="pb-stage" aria-label="Image"></main></div>
+<script>
+/* ================= Patchbook CFG: Claude fills in only this block ================= */
+const CFG = {
+  kind: "image",
+  version: "v1",                     // bump on every republish: v2, v3, ...
+  collection: "image_patches",       // one name per project
+  lang: "auto",                      // set to the user's language, e.g. "de" or "en"
+  strings: null,                     // other languages: { key: "translation", ... } for every UI string
+  // Images to review: "/_blob/<id>" from the asset store, or files published next to this page.
+  images: [
+    // { name: "Hero", src: "/_blob/..." },
+  ],
+};
+/* ================================================================================== */
+</script>
+<script>
+/*@core.js*/
+</script>
+<script>
+(() => {
+  const { h, I, t, S } = PB;
+  const stage = document.querySelector(".pb-stage");
+  const name = h("span", { class: "im-name" });
+  const fileIn = h("input", { type: "file", accept: "image/*", multiple: true, hidden: true, id: "pb-board-file", onchange: (e) => { importBoards([...e.target.files]); e.target.value = ""; } });
+  const prev = h("button", { class: "pb-ibtn", "aria-label": t("prev"), html: I.prev, onclick: () => step(-1) });
+  const next = h("button", { class: "pb-ibtn", "aria-label": t("next"), html: I.next, onclick: () => step(1) });
+  stage.append(h("div", { class: "pb-bar" }, PB.modeToggle(), prev, next, name, h("span", { class: "pb-grow" }),
+    h("button", { class: "pb-ibtn", title: t("importShot"), "aria-label": t("importShot"), html: I.camera, onclick: () => fileIn.click() }), fileIn));
+  const area = h("div", { class: "im-area" });
+  const host = h("div");
+  const empty = h("div", { class: "pb-placeholder", hidden: true }, h("b", { text: t("noSource") }), t("noSourceHint"));
+  area.append(host, empty);
+  const strip = h("div", { class: "im-strip" });
+  stage.append(area, strip);
+
+  const items = () => [
+    ...(CFG.images || []).map((x, i) => ({ key: "i:" + x.src, src: x.src, name: x.name || "Image " + (i + 1) })),
+    ...PB.boards.map((b) => ({ key: "b:" + b.id, src: PB.blobUrl(b.asset), name: b.name, board: b.id })),
+  ];
+  let cur = null;
+  const keyOf = (a) => (a.board ? "b:" + a.board : "i:" + a.img);
+  const canvas = PB.ImageCanvas(host, {
+    mode: () => S.mode,
+    pins: () => PB.visible().filter((p) => p.anchor && cur && keyOf(p.anchor) === cur.key),
+    draft: () => (S.draft.anchor && cur && keyOf(S.draft.anchor) === cur.key ? S.draft.anchor : null),
+    onDraft: (c, live) => {
+      const a = cur.board ? { board: cur.board } : { img: cur.src };
+      a.x = +c.x.toFixed(4); a.y = +c.y.toFixed(4); if (c.w != null) { a.w = +c.w.toFixed(4); a.h = +c.h.toFixed(4); }
+      if (live) { S.draft.anchor = a; canvas.draw(); return; }
+      PB.setDraft(a, label(a));
+    },
+    onMovePin: (id, a) => PB.movePatch(id, a, label(a)),
+  });
+  function label(a) {
+    const it = items().find((x) => x.key === keyOf(a));
+    const what = a.w != null ? t("region") : t("point");
+    return items().length > 1 && it ? it.name + " · " + what : what;
+  }
+  function show(it, then) {
+    if (!it) { empty.hidden = false; host.hidden = true; name.textContent = ""; return; }
+    empty.hidden = true; host.hidden = false; cur = it; name.textContent = it.name;
+    canvas.load(it.src); renderStrip();
+    if (then) setTimeout(then, 80);
+  }
+  function step(d) { const all = items(); if (!all.length) return; const i = Math.max(0, all.findIndex((x) => cur && x.key === cur.key)); show(all[(i + d + all.length) % all.length]); }
+  function renderStrip() {
+    const all = items(); strip.textContent = "";
+    prev.disabled = next.disabled = all.length < 2;
+    for (const it of all) {
+      const n = PB.patches.filter((p) => p.status !== "done" && p.anchor && keyOf(p.anchor) === it.key).length;
+      const b = h("button", { class: "im-thumb", title: it.name, "aria-label": it.name, "aria-current": String(!!cur && cur.key === it.key), onclick: () => show(it) }, h("img", { src: it.src, alt: "", loading: "lazy" }));
+      if (n) b.append(h("span", { class: "im-count pb-num", text: String(n) }));
+      strip.append(b);
+    }
+    strip.append(h("button", { class: "im-thumb im-add", title: t("importShot"), "aria-label": t("importShot"), html: I.plus, onclick: () => fileIn.click() }));
+  }
+  async function importBoards(files) {
+    let last = null;
+    for (const f of files) { try { last = await PB.addBoard(f); } catch { PB.toast(t("uploadFail")); } }
+    if (last) { show(items().find((x) => x.key === "b:" + last.id)); PB.setMode("comment"); }
+  }
+  PB.boot({
+    kind: "image", modes: true, boards: true, fabHost: area,
+    onMode: (m) => canvas.setMode(m),
+    onChange: () => { canvas.draw(); renderStrip(); },
+    onBoards: () => { renderStrip(); if (!cur) show(items()[0]); },
+    onStageDrop: importBoards,
+    onPasteImages: importBoards,
+    onKey: (e) => {
+      if (e.key === "ArrowLeft") { step(-1); return true; }
+      if (e.key === "ArrowRight") { step(1); return true; }
+      if (e.key === "f" || e.key === "F" || e.key === "0") { canvas.fit(); return true; }
+      if (e.key === "+" || e.key === "=") { const r = host.getBoundingClientRect(); canvas.zoomAt(1.25, r.width / 2, r.height / 2); return true; }
+      if (e.key === "-") { const r = host.getBoundingClientRect(); canvas.zoomAt(0.8, r.width / 2, r.height / 2); return true; }
+      return false;
+    },
+    focus: (p) => { const k = keyOf(p.anchor || {}); const it = items().find((x) => x.key === k); if (it && (!cur || cur.key !== k)) show(it); else canvas.draw(); },
+  });
+  host.style.cssText = "flex:1;min-width:0;position:relative";
+  show(items()[0]);
+})();
+</script>

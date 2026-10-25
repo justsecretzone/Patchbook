@@ -1,0 +1,19 @@
+/* media surface */
+.md-title { font-size: 13px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.md-video { flex: 1; min-height: 0; display: flex; background: #0c0c0b; position: relative; }
+.md-video video { width: 100%; height: 100%; object-fit: contain; display: block; cursor: pointer; }
+.md-audio { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: center; padding: 24px; }
+.md-audio audio { display: none; }
+.md-art { width: 100%; height: min(220px, 60%); }
+.md-big { width: 100%; height: 100%; display: block; cursor: pointer; }
+.md-controls { padding: 6px 14px 12px; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: 4px; }
+.md-row { display: flex; align-items: center; gap: 10px; }
+.md-play {
+  width: 34px; height: 34px; border-radius: 50%; border: 0; background: var(--accent); color: var(--on-accent);
+  display: grid; place-items: center; cursor: pointer; flex: none;
+}
+.md-play svg { width: 15px; height: 15px; }
+.md-time { font: 12px var(--mono); color: var(--muted); }
+.md-rate { padding: 3px 6px; font-size: 12px; }
+.md-tl { margin-top: 22px; }
+@media (max-width: 560px) { .md-keys { display: none; } }

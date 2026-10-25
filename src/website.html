@@ -1,0 +1,36 @@
+<title>Website Review</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/*@core.css*/
+/*@interface.css*/
+</style>
+<div id="pb-app"><main class="pb-stage" aria-label="Website"></main></div>
+<script>
+/* ================= Patchbook CFG: Claude fills in only this block ================= */
+const CFG = {
+  kind: "website",
+  version: "v1",                     // bump on every republish: v2, v3, ...
+  collection: "site_patches",        // one name per project, e.g. "acme_site_patches"
+  lang: "auto",                      // set to the user's language, e.g. "de" or "en"
+  strings: null,                     // other languages: { key: "translation", ... } for every UI string
+  // Pages of the site, published as files next to this page (Artifact `files`), first one opens.
+  pages: [
+    { name: "Start", src: "site/index.html" },
+  ],
+  // Breakpoints next to "Auto" (= the width the viewer is looking at, always the default).
+  breakpoints: [
+    ["Desktop", 1440, "desktop"],
+    ["Laptop", 1280, "laptop"],
+    ["Tablet", 768, "tablet"],
+    ["Mobile", 390, "phone"],
+  ],
+  device: false,
+};
+/* ================================================================================== */
+</script>
+<script>
+/*@core.js*/
+</script>
+<script>
+/*@interface.js*/
+</script>

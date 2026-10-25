@@ -1,0 +1,37 @@
+<title>App Review</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/*@core.css*/
+/*@interface.css*/
+</style>
+<div id="pb-app"><main class="pb-stage" aria-label="App"></main></div>
+<script>
+/* ================= Patchbook CFG: Claude fills in only this block ================= */
+const CFG = {
+  kind: "app",
+  version: "v1",                     // bump on every republish: v2, v3, ...
+  collection: "app_patches",         // one name per project, e.g. "acme_app_patches"
+  lang: "auto",                      // set to the user's language, e.g. "de" or "en"
+  strings: null,                     // other languages: { key: "translation", ... } for every UI string
+  // Screens: a live HTML build (files next to this page) or an image of a native screen.
+  screens: [
+    { name: "Home", src: "app/index.html" },
+  ],
+  // Device sizes [name, width, icon, height]. On a desktop the review opens in the first phone
+  // frame; on a phone it opens at "Auto" (the viewer's own screen).
+  breakpoints: [
+    ["Phone", 390, "phone", 844],
+    ["Tablet", 820, "tablet", 1180],
+    ["Desktop", 1280, "desktop"],
+  ],
+  device: true,
+};
+CFG.pages = CFG.screens;
+/* ================================================================================== */
+</script>
+<script>
+/*@core.js*/
+</script>
+<script>
+/*@interface.js*/
+</script>

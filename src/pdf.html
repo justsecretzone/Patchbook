@@ -1,0 +1,189 @@
+<title>PDF Review</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/*@core.css*/
+.pd-scroll { flex: 1; min-height: 0; overflow: auto; position: relative; }
+.pd-pages { display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 22px 16px 40px; min-width: min-content; }
+.pd-page { position: relative; background: #fff; box-shadow: var(--shadow), 0 0 0 1px var(--line); border-radius: 2px; flex: none; }
+.pd-page canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.pd-layer { position: absolute; inset: 0; pointer-events: none; }
+.pd-scroll.comment .pd-page { cursor: crosshair; }
+.pd-no { position: absolute; left: -2px; bottom: -18px; font: 10.5px var(--mono); color: var(--faint); }
+.pd-pos { font: 12px var(--mono); color: var(--muted); }
+.pb-mlabel { display: inline; }
+@media (max-width: 1180px) { .pb-mlabel { display: none; } }
+</style>
+<div id="pb-app"><main class="pb-stage" aria-label="PDF"></main></div>
+<script>
+/* ================= Patchbook CFG: Claude fills in only this block ================= */
+const CFG = {
+  kind: "pdf",
+  version: "v1",                     // bump on every republish: v2, v3, ...
+  collection: "pdf_patches",         // one name per project
+  lang: "auto",                      // set to the user's language, e.g. "de" or "en"
+  strings: null,                     // other languages: { key: "translation", ... } for every UI string
+  src: "",                           // "/_blob/<id>" from the asset store, or "doc.pdf" published next to this page
+};
+/* ================================================================================== */
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+/*@core.js*/
+</script>
+<script>
+(() => {
+  const { h, I, t, S, clamp } = PB;
+  const stage = document.querySelector(".pb-stage");
+  const pos = h("span", { class: "pd-pos pb-num", text: "" });
+  const zoomOut = h("output", { class: "pd-pos pb-num", style: "min-width:42px;text-align:center;cursor:pointer", title: t("fit") });
+  stage.append(h("div", { class: "pb-bar" }, PB.modeToggle(), pos, h("span", { class: "pb-grow" }),
+    h("button", { class: "pb-ibtn", "aria-label": t("zoomOut"), html: I.minus, onclick: () => zoom(1 / 1.2) }), zoomOut,
+    h("button", { class: "pb-ibtn", "aria-label": t("zoomIn"), html: I.plus, onclick: () => zoom(1.2) })));
+  const scroller = h("div", { class: "pd-scroll" });
+  const col = h("div", { class: "pd-pages" });
+  scroller.append(col); stage.append(scroller);
+
+  let pdf = null, pages = [], k = 1, fitW = 1;
+  const textCache = new Map();
+  async function load() {
+    if (!CFG.src) { col.append(h("div", { class: "pb-placeholder" }, h("b", { text: t("noSource") }), t("noSourceHint"))); return; }
+    if (!window.pdfjsLib) { col.append(h("div", { class: "pb-placeholder", text: "pdf.js could not load." })); return; }
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+    try { pdf = await pdfjsLib.getDocument({ url: CFG.src }).promise; }
+    catch (e) { col.append(h("div", { class: "pb-placeholder" }, h("b", { text: "PDF" }), String(e && e.message || e))); return; }
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i), vp = page.getViewport({ scale: 1 });
+      const el = h("div", { class: "pd-page", "data-page": i }), cv = h("canvas"), layer = h("div", { class: "pd-layer" });
+      el.append(cv, layer, h("span", { class: "pd-no pb-num", text: String(i) }));
+      col.append(el);
+      const P = { i, page, w: vp.width, h: vp.height, el, cv, layer, rendered: 0, task: null };
+      pages.push(P); wire(P);
+    }
+    fit(); io(); draw(); updatePos();
+  }
+  function fit() { const r = scroller.getBoundingClientRect(); const maxW = Math.max(...pages.map((p) => p.w)); fitW = Math.min(1.6, (r.width - 40) / maxW); k = 1; size(); }
+  function zoom(f) {
+    if (!pages.length) return;
+    const anchorY = (scroller.scrollTop + scroller.clientHeight / 2) / scroller.scrollHeight;
+    k = clamp(k * f, 0.3, 4); size();
+    scroller.scrollTop = anchorY * scroller.scrollHeight - scroller.clientHeight / 2;
+  }
+  zoomOut.addEventListener("click", fit);
+  function size() {
+    const s = fitW * k;
+    for (const p of pages) { p.el.style.width = p.w * s + "px"; p.el.style.height = p.h * s + "px"; p.rendered = 0; }
+    zoomOut.textContent = Math.round(k * 100) + "%";
+    renderVisible();
+  }
+  let obs = null;
+  const vis = new Set();
+  function io() {
+    obs = new IntersectionObserver((es) => { for (const e of es) (e.isIntersecting ? vis.add(e.target) : vis.delete(e.target)); renderVisible(); updatePos(); }, { root: scroller, rootMargin: "600px 0px" });
+    for (const p of pages) obs.observe(p.el);
+  }
+  async function renderVisible() {
+    const s = fitW * k, dpr = Math.min(2.5, devicePixelRatio || 1);
+    for (const p of pages) {
+      if (!vis.has(p.el) || p.rendered === s) continue;
+      p.rendered = s;
+      const vp = p.page.getViewport({ scale: s * dpr });
+      if (p.task) try { p.task.cancel(); } catch {}
+      const c = document.createElement("canvas"); c.width = Math.floor(vp.width); c.height = Math.floor(vp.height);
+      p.task = p.page.render({ canvasContext: c.getContext("2d"), viewport: vp });
+      p.task.promise.then(() => { p.cv.width = c.width; p.cv.height = c.height; p.cv.getContext("2d").drawImage(c, 0, 0); }, () => {});
+    }
+  }
+  function updatePos() {
+    if (!pages.length) return;
+    const mid = scroller.scrollTop + scroller.clientHeight / 3;
+    let cur = 1; for (const p of pages) if (p.el.offsetTop <= mid) cur = p.i;
+    pos.textContent = cur + " / " + pages.length;
+  }
+  scroller.addEventListener("scroll", updatePos, { passive: true });
+  new ResizeObserver(() => { if (pages.length && k === 1) fit(); }).observe(scroller);
+  scroller.addEventListener("wheel", (e) => { if (e.ctrlKey || e.metaKey) { e.preventDefault(); zoom(Math.exp(-e.deltaY * 0.01)); } }, { passive: false });
+
+  // ---------- placing patches ----------
+  function frac(P, e) { const r = P.el.getBoundingClientRect(); return { x: clamp((e.clientX - r.left) / r.width, 0, 1), y: clamp((e.clientY - r.top) / r.height, 0, 1) }; }
+  async function quoteFor(P, a) {
+    if (!textCache.has(P.i)) textCache.set(P.i, P.page.getTextContent().then((tc) => tc.items.map((it) => {
+      const [x, y] = [it.transform[4], it.transform[5]], hh = Math.hypot(it.transform[2], it.transform[3]) || 10;
+      return { s: it.str, x: x / P.w, y: 1 - (y + hh * 0.8) / P.h, w: (it.width || 0) / P.w, h: (hh * 1.1) / P.h };
+    })).catch(() => []));
+    const items = await textCache.get(P.i);
+    const box = a.w != null ? a : { x: a.x - 0.002, y: a.y - 0.004, w: 0.004, h: 0.008 };
+    const hit = items.filter((it) => it.s.trim() && it.x < box.x + box.w && it.x + it.w > box.x && it.y < box.y + box.h && it.y + it.h > box.y);
+    let s = hit.map((it) => it.s).join(" ").replace(/\s+/g, " ").trim();
+    return s.length > 140 ? s.slice(0, 139) + "…" : s;
+  }
+  function wire(P) {
+    let d = null;
+    P.el.addEventListener("pointerdown", (e) => { if (S.mode !== "comment" || e.button) return; e.preventDefault(); P.el.setPointerCapture(e.pointerId); d = { c0: frac(P, e), x: e.clientX, y: e.clientY, rect: null }; });
+    P.el.addEventListener("pointermove", (e) => {
+      if (!d) return;
+      if (Math.hypot(e.clientX - d.x, e.clientY - d.y) > 5) { const c = frac(P, e); d.rect = { x: Math.min(c.x, d.c0.x), y: Math.min(c.y, d.c0.y), w: Math.abs(c.x - d.c0.x), h: Math.abs(c.y - d.c0.y) }; S.draft.anchor = mk(P, d.rect); draw(); }
+    });
+    const up = async () => {
+      if (!d) return;
+      const a = mk(P, d.rect && d.rect.w > 0.004 ? d.rect : d.c0); d = null;
+      PB.setDraft(a, label(a));
+      const q = await quoteFor(P, a);
+      if (q && S.draft.anchor === a) { a.quote = q; PB.setDraft(a, label(a)); }
+    };
+    P.el.addEventListener("pointerup", up); P.el.addEventListener("pointercancel", () => (d = null));
+  }
+  function mk(P, c) { const a = { page: P.i, x: +c.x.toFixed(4), y: +c.y.toFixed(4) }; if (c.w != null) { a.w = +c.w.toFixed(4); a.h = +c.h.toFixed(4); } return a; }
+  function label(a) {
+    const q = a.quote ? " · " + PB.quote(a.quote.length > 36 ? a.quote.slice(0, 35) + "…" : a.quote) : a.w != null ? " · " + t("region") : "";
+    return `${t("page")} ${a.page}${q}`;
+  }
+  function draw() {
+    if (S.dragging) return;
+    for (const P of pages) P.layer.textContent = "";
+    const add = (a, n, st, sel, id) => {
+      const P = pages[a.page - 1]; if (!P) return;
+      const region = a.w != null ? h("div", { class: "pb-region" + (st === "done" ? " done" : st === "draft" ? " draft" : ""), style: `left:${a.x * 100}%;top:${a.y * 100}%;width:${a.w * 100}%;height:${a.h * 100}%` }) : null;
+      if (region) P.layer.append(region);
+      const el = PB.pin(n, st, sel, { left: a.x * 100 + "%", top: a.y * 100 + "%" });
+      if (PB.canDrag(st)) {
+        let pos = null;
+        PB.draggable(el, {
+          onClick: () => id && PB.select(id, false),
+          onMove: (ev) => {
+            const c = frac(P, ev); let x = c.x, y = c.y;
+            if (a.w != null) { x = clamp(x, 0, 1 - a.w); y = clamp(y, 0, 1 - a.h); }
+            pos = { x, y }; el.style.left = x * 100 + "%"; el.style.top = y * 100 + "%";
+            if (region) { region.style.left = x * 100 + "%"; region.style.top = y * 100 + "%"; }
+          },
+          onDrop: async () => {
+            if (!pos) return;
+            const na = { ...a, x: +pos.x.toFixed(4), y: +pos.y.toFixed(4) }; delete na.quote;
+            PB.movePatch(id, na, label(na));
+            const q = await quoteFor(P, na);
+            if (q) { na.quote = q; PB.movePatch(id, na, label(na)); }
+          },
+        });
+      } else if (id) el.addEventListener("pointerdown", (e) => { e.stopPropagation(); PB.select(id, false); });
+      P.layer.append(el);
+    };
+    for (const p of PB.visible()) if (p.anchor && p.anchor.page) add(p.anchor, p.n, p.status, S.sel === p.id, p.id);
+    if (S.draft.anchor && S.draft.anchor.page) add(S.draft.anchor, 0, "draft", false, null);
+  }
+  function focus(p) {
+    const a = p.anchor || {}; const P = pages[a.page - 1]; if (!P) return;
+    scroller.scrollTo({ top: P.el.offsetTop + a.y * P.el.offsetHeight - scroller.clientHeight / 3, behavior: "smooth" });
+  }
+  PB.boot({
+    kind: "pdf", modes: true,
+    onMode: (m) => scroller.classList.toggle("comment", m === "comment"),
+    onChange: draw, focus,
+    onKey: (e) => {
+      if (e.key === "+" || e.key === "=") { zoom(1.2); return true; }
+      if (e.key === "-") { zoom(1 / 1.2); return true; }
+      if (e.key === "0" || e.key === "f" || e.key === "F") { fit(); return true; }
+      return false;
+    },
+  });
+  load();
+})();
+</script>

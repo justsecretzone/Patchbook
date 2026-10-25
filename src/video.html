@@ -1,0 +1,32 @@
+<title>Video Review</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/*@core.css*/
+/*@media.css*/
+:root { --stage-h: min(72vh, calc((100vw - 32px) * .5625 + 150px)); --stage-h-m: calc((100vw - 32px) * .5625 + 150px); }
+</style>
+<div id="pb-app"><main class="pb-stage" aria-label="video"></main></div>
+<script>
+/* ================= Patchbook CFG: Claude fills in only this block ================= */
+const CFG = {
+  kind: "video",
+  version: "v1",                     // bump on every republish: v2, v3, ...
+  collection: "video_patches",       // one name per project
+  lang: "auto",                      // set to the user's language, e.g. "de" or "en"
+  strings: null,                     // other languages: { key: "translation", ... } for every UI string
+  src: "",                           // "/_blob/<id>" from the asset store (under 15 MB)
+  title: "",                         // optional short name shown above the player
+  duration: 0,                       // seconds, used until the file reports its own length
+  fps: 25,                           // frame rate, used by , and . for single frames
+  chapters: [                        // [name, startSeconds], from the cut list or song structure
+    // ["Intro", 0], ["Hook", 7.5],
+  ],
+};
+/* ================================================================================== */
+</script>
+<script>
+/*@core.js*/
+</script>
+<script>
+/*@media.js*/
+</script>

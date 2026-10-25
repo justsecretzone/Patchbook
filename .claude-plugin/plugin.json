@@ -1,0 +1,23 @@
+{
+  "name": "patchbook",
+  "version": "1.0.0",
+  "description": "Review skills for Claude: comment right on websites, apps, images, PDFs, audio and video, Claude works through the patches.",
+  "author": {
+    "name": "Justus Langowsky"
+  },
+  "license": "MIT",
+  "keywords": [
+    "review",
+    "feedback",
+    "comments",
+    "website",
+    "app",
+    "image",
+    "pdf",
+    "audio",
+    "video",
+    "artifacts"
+  ],
+  "homepage": "https://github.com/justsecretzone/Patchbook",
+  "repository": "https://github.com/justsecretzone/Patchbook"
+}

@@ -1,0 +1,44 @@
+name: Release skills
+
+# Builds one zip per skill plus patchbook-skills.zip and publishes them as a GitHub release.
+# Runs on every push to main that touches the skills, and by hand from the Actions tab.
+on:
+  push:
+    branches: [main]
+    paths: ["skills/**", ".claude-plugin/plugin.json", ".github/workflows/release.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read version
+        id: v
+        run: echo "version=$(jq -r .version .claude-plugin/plugin.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Build zips
+        run: |
+          mkdir -p dist
+          cd skills
+          for s in */; do s="${s%/}"; zip -qr "../dist/$s.zip" "$s"; done
+          cd ..
+          mkdir -p bundle/patchbook-skills
+          cp -r skills/* README.md LICENSE bundle/patchbook-skills/
+          (cd bundle && zip -qr ../dist/patchbook-skills.zip patchbook-skills)
+          ls -la dist
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: skills-v${{ steps.v.outputs.version }}
+          name: Patchbook Skills ${{ steps.v.outputs.version }}
+          make_latest: true
+          body: |
+            Six review skills for Claude. Download `patchbook-skills.zip` for all of them, or a single skill zip to upload in Claude under Customize → Skills.
+            See the [README](https://github.com/justsecretzone/Patchbook#install) for installation.
+          files: dist/*.zip

@@ -1,0 +1,13 @@
+{
+  "name": "patchbook",
+  "owner": {
+    "name": "Justus Langowsky"
+  },
+  "plugins": [
+    {
+      "name": "patchbook",
+      "source": "./",
+      "description": "Review skills for Claude: comment right on websites, apps, images, PDFs, audio and video, Claude works through the patches."
+    }
+  ]
+}
