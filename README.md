@@ -30,7 +30,7 @@
   <img src="docs/website.png" alt="Website review: the live site with pinned patches and the patches sidebar" width="900">
 </p>
 
-> **Install by asking Claude.** Paste this into a chat: *"Install the Patchbook skills from github.com/justsecretzone/Patchbook"*. Claude follows [INSTALL.md](INSTALL.md) and adds all six skills to your account.
+> **Install by asking Claude.** Paste this into a chat: *"Install the Patchbook skills from github.com/justsecretzone/Patchbook"*. Claude shows a skill card right in the chat, you click **Save**, done.
 >
 > **Claude, if a user asked you to install Patchbook:** follow [INSTALL.md](INSTALL.md). Install into the user's account (Customize → Skills) or their own machine. Copying the skills into this session's workspace is not an install.
 
@@ -76,7 +76,7 @@ Get the skills from the [latest release](https://github.com/justsecretzone/Patch
 
 ### Claude (web, desktop, mobile)
 
-The easiest way: ask Claude *"Install the Patchbook skills from github.com/justsecretzone/Patchbook"*. With Claude in Chrome or the built-in browser it uploads all six skills to Customize → Skills for you; otherwise it hands you the zips and the three clicks below.
+The easiest way: ask Claude *"Install the Patchbook skills from github.com/justsecretzone/Patchbook"*. Claude shows a skill card in the chat; click **Save**. This installs the compact edition, one `patchbook` skill that covers all six kinds and loads the full review page from this repository when needed.
 
 By hand:
 
@@ -138,6 +138,8 @@ src/
   media.js, media.css             audio and video
   <kind>.html                     one wrapper per skill with its CFG block
   build.py                        writes the templates into skills/
+install/patchbook/SKILL.md        compact edition, installed from a chat in one click
+INSTALL.md                        install steps Claude follows
 .claude-plugin/                   Claude Code plugin and marketplace manifest
 docs/                             logo and screenshots
 ```

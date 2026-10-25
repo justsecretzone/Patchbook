@@ -2,7 +2,8 @@
 
 ## Unreleased
 
-- Install by asking Claude: INSTALL.md tells Claude how to add the skills to your account (Customize → Skills) or your own machine instead of only copying them into a temporary session.
+- Install by asking Claude: Claude shows a skill card in the chat and one click on Save installs Patchbook. The compact edition (`install/patchbook`) covers all six kinds and loads each review page from this repository when needed.
+- INSTALL.md tells Claude how to install permanently (skill card, browser upload or zips) instead of only copying the skills into a temporary session.
 
 ## 1.1.1
 
