@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Install by asking Claude: INSTALL.md tells Claude how to add the skills to your account (Customize → Skills) or your own machine instead of only copying them into a temporary session.
+
 ## 1.1.1
 
 - Removed the dictation button. Claude's artifact frame blocks the microphone, so it could not work inside Claude. System dictation (Mac: Fn twice, phones: keyboard microphone) still types into the comment field.

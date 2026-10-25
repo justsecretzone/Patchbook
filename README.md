@@ -30,6 +30,10 @@
   <img src="docs/website.png" alt="Website review: the live site with pinned patches and the patches sidebar" width="900">
 </p>
 
+> **Install by asking Claude.** Paste this into a chat: *"Install the Patchbook skills from github.com/justsecretzone/Patchbook"*. Claude follows [INSTALL.md](INSTALL.md) and adds all six skills to your account.
+>
+> **Claude, if a user asked you to install Patchbook:** follow [INSTALL.md](INSTALL.md). Install into the user's account (Customize → Skills) or their own machine. Copying the skills into this session's workspace is not an install.
+
 ## Why
 
 Giving feedback on generated work in a chat is clumsy: "the second button in the hero, a bit darker, and on mobile the headline wraps badly". Patchbook replaces that with a review page next to every piece of work. You point at the exact spot, write one line, attach a screenshot if it helps. When you're done, you tell Claude, and it works through the list, publishes the next version and closes each patch with a note on what changed.
@@ -71,6 +75,10 @@ Giving feedback on generated work in a chat is clumsy: "the second button in the
 Get the skills from the [latest release](https://github.com/justsecretzone/Patchbook/releases/latest): `patchbook-skills.zip` holds all six, and each skill is also available on its own (`website-review.zip`, `video-review.zip`, ...). You can also download this repository with **Code → Download ZIP** or clone it.
 
 ### Claude (web, desktop, mobile)
+
+The easiest way: ask Claude *"Install the Patchbook skills from github.com/justsecretzone/Patchbook"*. With Claude in Chrome or the built-in browser it uploads all six skills to Customize → Skills for you; otherwise it hands you the zips and the three clicks below.
+
+By hand:
 
 1. Download a single skill zip from the release, for example `website-review.zip`.
 2. In Claude go to **Customize → Skills**, click **+**, then **Create skill → Upload a skill**, and choose the zip.
