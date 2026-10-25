@@ -34,7 +34,7 @@ const PB = (() => {
       emptyDone: "Nothing done yet.",
       attach: "Attach screenshot", drop: "Drop screenshot here", local: "Patches stay in this browser.",
       readonly: "Read only. Commenting needs edit access.",
-      handoff: "Done? Tell Claude:", handoffText: "Work through the patches", handoffLocal: "Done? Copy and paste into the chat:", copyPatches: "Copy patches", shotNote: "attach the screenshot in the chat", copied: "Copied", copy: "Copy",
+      handoff: "Done? Say:", handoffText: "Work through the patches", handoffLocal: "Done? Copy and paste into the chat:", copyPatches: "Copy patches", shotNote: "attach the screenshot in the chat", copied: "Copied", copy: "Copy",
       armed: "Click again to delete", del: "Delete", markDone: "Mark as done", reopen: "Reopen",
       uploadFail: "Upload failed", saveFail: "Could not save", send: "Save",
       screenshot: "Screenshot", screenshots: "Screenshots", importShot: "Import screenshot", fit: "Fit",
