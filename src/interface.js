@@ -87,7 +87,7 @@
     frame.hidden = img; imgHost.hidden = !img; bpSeg.hidden = img; widthOut.hidden = img;
     if (img) { canvas.load(v.src); canvas.setMode(S.mode); then && setTimeout(then, 60); }
     else { pendingThen = then || null; if (iframe.getAttribute("src") !== v.src) iframe.src = v.src; else if (then) then(); layout(); }
-    PB.refreshChip();
+    PB.refreshChip(); PB.refresh && PB.refresh();
   }
   let pendingThen = null;
   function reload() { if (view && view.type === "page") { try { iframe.contentWindow.location.reload(); } catch { iframe.src = view.src; } } else if (view) canvas.fit(); }
@@ -167,16 +167,16 @@
     fdoc.addEventListener("paste", (e) => PB.handlePaste(e));
     fwin.addEventListener("scroll", schedule, { passive: true });
     fwin.addEventListener("resize", schedule);
-    fwin.addEventListener("hashchange", () => { schedule(); PB.refreshChip(); });
+    fwin.addEventListener("hashchange", () => { schedule(); PB.refreshChip(); PB.refresh(); });
     try { new fwin.ResizeObserver(schedule).observe(fdoc.documentElement); } catch {}
-    setMode(S.mode); schedule();
+    setMode(S.mode); schedule(); PB.refresh();
   }
   function pageKey() {
     if (!fwin) return view ? view.src : "";
     try {
       const base = new URL(".", location.href).href, u = new URL(fwin.location.href);
       let k = u.href.startsWith(base) ? u.href.slice(base.length) : u.href;
-      k = k.split("#")[0]; if (u.hash.includes("/")) k += u.hash;
+      k = k.split("#")[0]; if (u.hash.includes("/") && u.hash !== "#/") k += u.hash;
       return k || (view ? view.src : "");
     } catch { return view ? view.src : ""; }
   }
@@ -336,6 +336,12 @@
 
   PB.boot({
     kind: CFG.kind, modes: true, boards: true, fabHost: area,
+    scope: (p) => {
+      const a = p.anchor; if (!view) return true;
+      if (view.type === "board") return a.board === view.id;
+      if (view.type === "image") return !!a.frac && a.page === view.src;
+      return !a.board && !a.frac && samePage(a.page, pageKey());
+    },
     onMode: setMode,
     onChange: schedule,
     onBoards: renderSelect,

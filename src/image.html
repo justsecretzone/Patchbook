@@ -82,7 +82,7 @@ const CFG = {
   function show(it, then) {
     if (!it) { empty.hidden = false; host.hidden = true; name.textContent = ""; return; }
     empty.hidden = true; host.hidden = false; cur = it; name.textContent = it.name;
-    canvas.load(it.src); renderStrip();
+    canvas.load(it.src); renderStrip(); PB.refresh && PB.refresh();
     if (then) setTimeout(then, 80);
   }
   function step(d) { const all = items(); if (!all.length) return; const i = Math.max(0, all.findIndex((x) => cur && x.key === cur.key)); show(all[(i + d + all.length) % all.length]); }
@@ -103,7 +103,8 @@ const CFG = {
     if (last) { show(items().find((x) => x.key === "b:" + last.id)); PB.setMode("comment"); }
   }
   PB.boot({
-    kind: "image", modes: true, boards: true, fabHost: area,
+    kind: "image", modes: true, boards: true, fabHost: area, scopeNoun: "image",
+    scope: (p) => !cur || keyOf(p.anchor) === cur.key,
     onMode: (m) => canvas.setMode(m),
     onChange: () => { canvas.draw(); renderStrip(); },
     onBoards: () => { renderStrip(); if (!cur) show(items()[0]); },

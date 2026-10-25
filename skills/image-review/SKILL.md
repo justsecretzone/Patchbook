@@ -25,6 +25,7 @@ The review page speaks the user's language, not the browser's, and follows the u
 
 Everything in the page is minimal and monochrome so it sits naturally next to Claude, and the work itself gets as much room as possible. There are no version labels and no shortcut hints in the UI. Shared across all Patchbook skills:
 - **Patches** panel: Open / Done with counts, numbered patches matching the pins, check to close, trash twice to delete, double-click to edit. For websites, apps, images and PDFs it is a sidebar on the right that collapses to a slim rail with the open count (on phones a bottom sheet that collapsed shows only the input). For audio and video there is no sidebar: the input sits right under the timeline and the patches list below it.
+- Patches stay where they were made: the list shows the patches of the current page, screen or image, with a link to the ones elsewhere. General patches without a spot show everywhere.
 - Pins and marked areas on the work can be dragged to a new spot (website, app, image, PDF, screenshots). The patch saves its new anchor on release; on websites and apps it re-attaches to the element under the new spot, on PDFs it captures the text there again.
 - Composer: a context line (where the patch sits, with a pin icon), attached screenshots, the text field, and a tool row with the send button. Enter saves.
 - Screenshots everywhere: paste (Cmd/Ctrl+V), drag onto the composer, or the image button. They upload to the artifact's asset store and travel with the patch.

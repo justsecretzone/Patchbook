@@ -321,6 +321,10 @@ button { font: inherit; color: inherit; }
 #pb-app.below .pb-sum { display: none !important; }
 #pb-app.below .pb-empty { padding: 18px; }
 @media (max-width: 860px) { #pb-app.below .pb-stage { height: var(--stage-h-m, 56vh); } }
+
+.pb-scope { align-self: flex-start; margin: 6px 10px 4px; border: 0; background: none; padding: 4px 0; font-size: 12px; color: var(--muted); cursor: pointer; text-decoration: underline; text-decoration-color: var(--line-strong); text-underline-offset: 3px; }
+.pb-scope:hover { color: var(--ink); }
+.pb-empty + .pb-scope { align-self: center; margin-top: -8px; }
 .pd-scroll { flex: 1; min-height: 0; overflow: auto; position: relative; }
 .pd-pages { display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 22px 16px 40px; min-width: min-content; }
 .pd-page { position: relative; background: #fff; box-shadow: var(--shadow), 0 0 0 1px var(--line); border-radius: 2px; flex: none; }
@@ -362,7 +366,7 @@ const PB = (() => {
       placeholder: "Was soll sich ändern?", general: "Allgemein", browse: "Ansehen", comment: "Kommentieren",
       emptyOpen: "Noch keine Patches. Tippe auf Kommentieren und dann auf eine Stelle.", tapSpot: "Tippe auf eine Stelle",
       emptyOpenTime: "Noch keine Patches. Einfach oben tippen, der Zeitstempel kommt automatisch.",
-      emptyDone: "Noch nichts erledigt.",
+      emptyDone: "Noch nichts erledigt.", otherPages: "+{n} auf anderen Seiten", otherImages: "+{n} auf anderen Bildern", thisPageOnly: "Nur diese Seite", thisImageOnly: "Nur dieses Bild",
       attach: "Screenshot anhängen", drop: "Screenshot hier ablegen", local: "Patches bleiben in diesem Browser.",
       readonly: "Nur Lesen. Zum Kommentieren braucht es Bearbeitungsrechte.",
       handoff: "Fertig? Schreib Claude:", handoffText: "Patches abarbeiten", handoffLocal: "Fertig? Kopieren und in den Chat einfügen:", copyPatches: "Patches kopieren", shotNote: "Screenshot im Chat anhängen", copied: "Kopiert", copy: "Kopieren",
@@ -380,7 +384,7 @@ const PB = (() => {
       placeholder: "What should change?", general: "General", browse: "Browse", comment: "Comment",
       emptyOpen: "No patches yet. Tap Comment, then tap a spot.", tapSpot: "Tap a spot",
       emptyOpenTime: "No patches yet. Just type above, the timestamp is added for you.",
-      emptyDone: "Nothing done yet.",
+      emptyDone: "Nothing done yet.", otherPages: "+{n} on other pages", otherImages: "+{n} on other images", thisPageOnly: "This page only", thisImageOnly: "This image only",
       attach: "Attach screenshot", drop: "Drop screenshot here", local: "Patches stay in this browser.",
       readonly: "Read only. Commenting needs edit access.",
       handoff: "Done? Say:", handoffText: "Work through the patches", handoffLocal: "Done? Copy and paste into the chat:", copyPatches: "Copy patches", shotNote: "attach the screenshot in the chat", copied: "Copied", copy: "Copy",
@@ -456,7 +460,10 @@ const PB = (() => {
   let ui = {};
 
   const isOpen = (p) => p.status !== "done";
-  const visible = () => S.patches.filter((p) => (S.filter === "open" ? isOpen(p) : !isOpen(p)));
+  // A patch belongs to the page, screen or image it was made on; the surface decides via O.scope.
+  const inScope = (p) => S.scopeAll || !O.scope || !p.anchor || O.scope(p);
+  const inTab = (p, f) => (f === "open" ? isOpen(p) : !isOpen(p));
+  const visible = () => S.patches.filter((p) => inTab(p, S.filter) && inScope(p));
   const blobUrl = (id) => (String(id).startsWith("data:") ? id : localBlobs.get(id) || "/_blob/" + id);
   function changed() { renderList(); O.onChange && O.onChange(); saveLocal(); }
 
@@ -707,7 +714,7 @@ const PB = (() => {
     if (ui.sum) { ui.sum.textContent = nOpen ? nOpen + " " + t("openN") : ""; ui.railCount.textContent = nOpen ? String(nOpen) : ""; ui.railCount.hidden = !nOpen; }
     for (const f of ["open", "done"]) {
       ui.tabs[f].setAttribute("aria-pressed", String(S.filter === f));
-      ui.tabs[f].querySelector(".pb-count").textContent = S.patches.filter((p) => (f === "open" ? isOpen(p) : !isOpen(p))).length;
+      ui.tabs[f].querySelector(".pb-count").textContent = S.patches.filter((p) => inTab(p, f) && inScope(p)).length;
     }
   }
   function renderFoot() {
@@ -724,12 +731,21 @@ const PB = (() => {
     renderTabs();
     const items = visible().sort((a, b) => S.filter === "open" ? (a.n || 0) - (b.n || 0) : (b.doneAt || b.created || 0) - (a.doneAt || a.created || 0));
     ui.list.textContent = "";
+    const elsewhere = O.scope && !S.scopeAll ? S.patches.filter((p) => inTab(p, S.filter) && !inScope(p)).length : 0;
+    const scopeLink = () => {
+      if (!O.scope || (!elsewhere && !S.scopeAll)) return null;
+      const noun = O.scopeNoun === "image" ? ["otherImages", "thisImageOnly"] : ["otherPages", "thisPageOnly"];
+      return h("button", { class: "pb-scope", onclick: () => { S.scopeAll = !S.scopeAll; changed(); } },
+        S.scopeAll ? t(noun[1]) : t(noun[0]).replace("{n}", elsewhere));
+    };
     if (!items.length) {
       ui.list.append(h("div", { class: "pb-empty" }, h("span", { html: S.filter === "open" ? I.comment : I.check }),
         S.filter === "open" ? (O.timeBased ? t("emptyOpenTime") : t("emptyOpen")) : t("emptyDone")));
+      const l = scopeLink(); if (l) ui.list.append(l);
       return;
     }
     for (const p of items) ui.list.append(itemEl(p));
+    const l = scopeLink(); if (l) ui.list.append(l);
   }
   function itemEl(p) {
     const st = p.status === "done" ? "done" : p.status === "working" ? "working" : "open";
@@ -1101,7 +1117,7 @@ const PB = (() => {
   }
 
   return {
-    boot, quote, setCollapsed, draggable, movePatch, canDrag, t, I, h, $, S, pin, blobUrl, fmtTime, clamp, toast, lightbox, setDraft, clearDraft, refreshChip, select, setMode,
+    boot, refresh: () => changed(), quote, setCollapsed, draggable, movePatch, canDrag, t, I, h, $, S, pin, blobUrl, fmtTime, clamp, toast, lightbox, setDraft, clearDraft, refreshChip, select, setMode,
     modeToggle, visible, addBoard, attach, upload, keyTarget, handlePaste, ImageCanvas, Timeline, lang,
     get patches() { return S.patches; }, get boards() { return S.boards; },
   };
