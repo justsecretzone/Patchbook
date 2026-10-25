@@ -39,6 +39,26 @@ jobs:
           name: Patchbook Skills ${{ steps.v.outputs.version }}
           make_latest: true
           body: |
-            Six review skills for Claude. Download `patchbook-skills.zip` for all of them, or a single skill zip to upload in Claude under Customize → Skills.
-            See the [README](https://github.com/justsecretzone/Patchbook#install) for installation.
+            Review skills for Claude. Every website, app, image, PDF, audio file or video Claude builds gets a review page where you pin comments on the exact spot, attach screenshots, and let Claude work through the patches.
+
+            ### What's inside
+            | Skill | Reviews |
+            | --- | --- |
+            | `website-review` | Live websites at any breakpoint |
+            | `app-review` | Live apps in a device frame, or native screens |
+            | `image-review` | Images, posters, logos and variants |
+            | `pdf-review` | PDFs, page by page |
+            | `audio-review` | Songs, mixes, jingles, voiceovers |
+            | `video-review` | Video cuts with a scene bar |
+
+            ### Downloads
+            - **`patchbook-skills.zip`**: all six skills, plus README and license
+            - **`<name>-review.zip`**: one skill, ready to upload
+
+            ### Install
+            - **Claude (web, desktop, mobile):** Customize → Skills → **+** → Create skill → Upload a skill, then pick a single skill zip.
+            - **Claude Code:** `/plugin marketplace add justsecretzone/Patchbook`, then `/plugin install patchbook@patchbook`.
+            - **ChatGPT (Business, Enterprise, Edu):** Plugins → Skills → Create → Upload from your computer. Patches stay in the browser there; use **Copy patches** to hand them back.
+
+            Full guide in the [README](https://github.com/justsecretzone/Patchbook#install).
           files: dist/*.zip
