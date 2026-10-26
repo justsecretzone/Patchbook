@@ -431,7 +431,7 @@ const PB = (() => {
       });
       acts.append(del);
     }
-    el.append(h("div", { class: "pb-badge pb-num", text: String(p.n || "·") }), body, acts);
+    el.append(p.status === "done" ? h("div", { class: "pb-badge pb-num", html: I.check }) : h("div", { class: "pb-badge pb-num", text: String(p.n || "·") }), body, acts);
     el.addEventListener("click", () => select(p.id, true));
     el.addEventListener("keydown", (e) => { if (e.key === "Enter" && e.target === el) select(p.id, true); });
     return el;
@@ -507,7 +507,7 @@ const PB = (() => {
   function pin(n, status, sel, extra) {
     const el = document.createElement("div");
     el.className = "pb-pin" + (status === "done" ? " done" : status === "working" ? " working" : status === "draft" ? " draft" : "") + (sel ? " sel" : "");
-    el.textContent = status === "draft" ? "+" : String(n || "·");
+    if (status === "done") el.innerHTML = I.check; else el.textContent = status === "draft" ? "+" : String(n || "·");
     if (extra) Object.assign(el.style, extra);
     return el;
   }
@@ -742,7 +742,7 @@ const PB = (() => {
         pd.mode = "zoom";
         const span = Math.max(Math.min(dur(), 4), dur() * 0.08), c = t0;
         const a = clamp(c - span * ((x - PAD) / IW()), 0, Math.max(0, dur() - span));
-        setView(a, a + span); opts.seek(t0); opts.onScrubStart && opts.onScrubStart();
+        host.classList.add("tl-big"); setView(a, a + span); opts.seek(t0); opts.onScrubStart && opts.onScrubStart();
       }, 320) };
     });
     host.addEventListener("pointermove", (e) => {
@@ -758,7 +758,7 @@ const PB = (() => {
     const up = () => {
       if (!pd) return; clearTimeout(pd.timer);
       if (pd.mode === "pending") opts.seek(pd.t0);
-      else if (pd.mode === "zoom") reset();
+      else if (pd.mode === "zoom") { host.classList.remove("tl-big"); reset(); }
       else if (pd.mode === "range" && range) { if (range[1] - range[0] > 0.15) opts.onRange(range[0], range[1]); }
       range = null; pd = null; tip.hidden = true; draw();
     };

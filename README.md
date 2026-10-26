@@ -44,8 +44,8 @@ Giving feedback on generated work in a chat is clumsy: "the second button in the
 | [`app-review`](skills/app-review) | The live app in a device frame, or native screens as images | Pin patches on elements, switch screens and devices |
 | [`image-review`](skills/image-review) | Images, posters, logos, variants | Click for a point, drag for an area, zoom and pan |
 | [`pdf-review`](skills/pdf-review) | Every page of a PDF | Click or drag on a page, the text underneath is captured |
-| [`audio-review`](skills/audio-review) | Songs, mixes, jingles, voiceovers | Waveform timeline: tap to jump, hold to zoom, drag for a range |
-| [`video-review`](skills/video-review) | The current cut | Scene bar: tap to jump, hold to zoom, drag for a range, attach a frame |
+| [`audio-review`](skills/audio-review) | Songs, mixes, jingles, voiceovers | Waveform timeline: tap to jump, hold and the track grows and zooms in, drag for a range |
+| [`video-review`](skills/video-review) | The current cut | Scene bar: tap to jump, hold and the track grows and zooms in, drag for a range |
 
 ## Features
 

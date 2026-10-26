@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.0
+
+- Done patches get a green check, on the pin and in the list.
+- The patches title uses the same sans serif as the rest of the page.
+- Audio and video: press and hold on the timeline and the track grows taller and zooms in, release and it contracts again.
+
 ## 1.2.0
 
 - The patches panel shows no logo anymore: not in the header, the collapsed rail or Claude's replies.

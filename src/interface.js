@@ -127,7 +127,7 @@
     return `:host{all:initial}
 *{box-sizing:border-box}
 .pb-pin{position:absolute;width:26px;height:26px;transform:translateY(-100%);border-radius:50% 50% 50% 0;background:${v("--accent")};color:${v("--on-accent")};font:600 11px/26px ${v("--font")};text-align:center;cursor:pointer;pointer-events:auto;box-shadow:0 0 0 2px ${v("--panel")},0 3px 8px rgba(0,0,0,.3);user-select:none}
-.pb-pin.working{background:${v("--work")}}.pb-pin.done{background:${v("--done-pin")}}
+.pb-pin.working{background:${v("--work")}}.pb-pin.done{background:${v("--ok")};color:#fff}.pb-pin.done svg{width:62%;height:62%;display:block;margin:auto}
 .pb-pin.sel{box-shadow:0 0 0 2px ${v("--panel")},0 0 0 4px ${v("--accent")},0 3px 8px rgba(0,0,0,.3);z-index:3}
 .pb-pin:not(.done){cursor:grab;touch-action:none}.pb-pin.dragging{cursor:grabbing;box-shadow:0 0 0 2px ${v("--panel")},0 10px 22px rgba(0,0,0,.35);z-index:5}
 .pb-pin.draft{background:${v("--panel")};color:${v("--ink")};box-shadow:0 0 0 2px ${v("--ink")},0 3px 8px rgba(0,0,0,.3)}
