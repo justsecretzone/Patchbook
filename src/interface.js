@@ -19,7 +19,6 @@
     PB.modeToggle(), select,
     h("span", { class: "pb-grow" }),
     bpSeg, widthOut,
-    h("button", { class: "pb-ibtn", title: L.import, "aria-label": L.import, html: I.camera, onclick: () => fileIn.click() }),
     h("button", { class: "pb-ibtn if-reload", title: L.reload, "aria-label": L.reload, html: I.reload, onclick: () => reload() }), fileIn);
   const area = h("div", { class: "if-area" });
   const frame = h("div", { class: "if-frame" });

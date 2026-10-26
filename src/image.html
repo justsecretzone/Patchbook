@@ -48,7 +48,7 @@ const CFG = {
   const prev = h("button", { class: "pb-ibtn", "aria-label": t("prev"), html: I.prev, onclick: () => step(-1) });
   const next = h("button", { class: "pb-ibtn", "aria-label": t("next"), html: I.next, onclick: () => step(1) });
   stage.append(h("div", { class: "pb-bar" }, PB.modeToggle(), prev, next, name, h("span", { class: "pb-grow" }),
-    h("button", { class: "pb-ibtn", title: t("importShot"), "aria-label": t("importShot"), html: I.camera, onclick: () => fileIn.click() }), fileIn));
+    fileIn));
   const area = h("div", { class: "im-area" });
   const host = h("div");
   const empty = h("div", { class: "pb-placeholder", hidden: true }, h("b", { text: t("noSource") }), t("noSourceHint"));

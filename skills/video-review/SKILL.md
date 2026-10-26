@@ -19,7 +19,7 @@ The review page speaks the user's language, not the browser's, and follows the u
 
 `assets/review-template.html` is the finished page. What it does:
 - Player on top, then a scene bar. Tap to jump, **press and hold to zoom in** for precise scrubbing, release to zoom back out, **drag to mark a range**. Comment dots sit above the bar.
-- A chat-style input with a timestamp chip. Typing pauses the video, Enter saves. The camera button attaches the current frame as a screenshot.
+- A chat-style input with a timestamp chip. Typing pauses the video, Enter saves.
 - Notes in the sidebar with an Open / Done switch and counts.
 - Keys: K or Space play/pause, C comment, `,` and `.` single frame, J/L ±2 s.
 

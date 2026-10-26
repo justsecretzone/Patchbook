@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased
+## 1.2.0
+
+- The patches panel shows no logo anymore: not in the header, the collapsed rail or Claude's replies.
+- Removed the screenshot buttons from the toolbars and the video composer. Pasting or dropping a screenshot still works everywhere.
+- New wordmark set in Geist, and new README screenshots with a software example.
 
 - Install by asking Claude: Claude shows a skill card in the chat and one click on Save installs Patchbook. The compact edition (`install/patchbook`) covers all six kinds and loads each review page from this repository when needed.
 - INSTALL.md tells Claude how to install permanently (skill card, browser upload or zips) instead of only copying the skills into a temporary session.

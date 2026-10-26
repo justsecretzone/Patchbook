@@ -674,11 +674,11 @@ const PB = (() => {
     }
     ui.sum = h("span", { class: "pb-sum pb-num" });
     ui.toggle = h("button", { class: "pb-ibtn pb-toggle", "aria-label": t("collapse"), title: t("collapse"), onclick: (e) => { e.stopPropagation(); setCollapsed(!S.collapsed); } });
-    const head = h("header", { class: "pb-head" }, h("div", { class: "pb-title" }, h("span", { class: "pb-mark", html: I.mark }), t("patches"), ui.sum), seg, ui.toggle);
+    const head = h("header", { class: "pb-head" }, h("div", { class: "pb-title" }, t("patches"), ui.sum), seg, ui.toggle);
     head.addEventListener("click", (e) => { if (O.layout !== "below" && mobile() && !e.target.closest(".pb-seg")) setCollapsed(!S.collapsed); });
     ui.railCount = h("span", { class: "pb-rail-count pb-num" });
     ui.rail = h("button", { class: "pb-rail", "aria-label": t("expand"), title: t("expand"), onclick: () => setCollapsed(false) },
-      h("span", { class: "pb-ibtn", html: I.panel }), h("span", { class: "pb-mark", html: I.mark }), ui.railCount);
+      h("span", { class: "pb-ibtn", html: I.panel }), ui.railCount);
     ui.list = h("div", { class: "pb-list", role: "list" });
     ui.ctxIcon = h("span", { class: "pb-ctx-ico" });
     ui.ctxText = h("span", { class: "pb-ctx-text" });
@@ -781,7 +781,7 @@ const PB = (() => {
     const body = h("div", { style: "min-width:0" }, meta, text);
     if (p.shots && p.shots.length) body.append(h("div", { class: "pb-shots" }, p.shots.map((id) => h("img", { src: blobUrl(id), alt: t("screenshot"), loading: "lazy", onclick: (e) => { e.stopPropagation(); lightbox(blobUrl(id)); } }))));
     if (st === "working") body.append(h("div", { class: "pb-state", text: t("working") }));
-    if (p.reply) body.append(h("div", { class: "pb-reply" }, h("span", { html: I.mark }), h("span", { text: p.reply })));
+    if (p.reply) body.append(h("div", { class: "pb-reply" }, h("span", { text: p.reply })));
     const acts = h("div", { class: "pb-acts" });
     if (!S.readonly) {
       acts.append(h("button", {
@@ -1155,7 +1155,7 @@ const PB = (() => {
   const tlHost = h("div", { class: "md-tl" });
   const empty = h("div", { class: "pb-placeholder", hidden: true }, h("b", { text: t("noSource") }), t("noSourceHint"));
   const viewer = h("div", { class: isVideo ? "md-video" : "md-audio" }, media, empty);
-  const grab = isVideo ? h("button", { class: "pb-ibtn", title: t("attachFrame"), "aria-label": t("attachFrame"), html: I.camera, onclick: grabFrame }) : null;
+  const grab = null;
   const rateSel = h("select", { class: "pb-select md-rate", "aria-label": t("speed"), id: "pb-rate" }, ["0.5", "0.75", "1", "1.25", "1.5", "2"].map((r) => h("option", { value: r, text: r + "×", selected: r === "1" })));
   rateSel.addEventListener("change", () => (media.playbackRate = +rateSel.value));
   stage.append(

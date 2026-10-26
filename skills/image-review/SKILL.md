@@ -21,7 +21,7 @@ The review page speaks the user's language, not the browser's, and follows the u
 - Canvas with zoom (Ctrl/Cmd + wheel, pinch, + / −, 0 to fit) and pan (wheel, drag in Browse mode, Space + drag).
 - The floating **Comment** button (or C): click pins a point, drag marks an area. Pins keep their size at every zoom.
 - Filmstrip at the bottom for several images or variants (← →), with open-patch counts.
-- The + tile, camera button, paste or drop: imports a screenshot or reference image as its own board to comment on.
+- The + tile, paste or drop: imports a screenshot or reference image as its own board to comment on.
 
 Everything in the page is minimal and monochrome so it sits naturally next to Claude, and the work itself gets as much room as possible. There are no version labels and no shortcut hints in the UI. Shared across all Patchbook skills:
 - **Patches** panel: Open / Done with counts, numbered patches matching the pins, check to close, trash twice to delete, double-click to edit. For websites, apps, images and PDFs it is a sidebar on the right that collapses to a slim rail with the open count (on phones a bottom sheet that collapsed shows only the input). For audio and video there is no sidebar: the input sits right under the timeline and the patches list below it.

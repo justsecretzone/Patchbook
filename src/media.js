@@ -12,7 +12,7 @@
   const tlHost = h("div", { class: "md-tl" });
   const empty = h("div", { class: "pb-placeholder", hidden: true }, h("b", { text: t("noSource") }), t("noSourceHint"));
   const viewer = h("div", { class: isVideo ? "md-video" : "md-audio" }, media, empty);
-  const grab = isVideo ? h("button", { class: "pb-ibtn", title: t("attachFrame"), "aria-label": t("attachFrame"), html: I.camera, onclick: grabFrame }) : null;
+  const grab = null;
   const rateSel = h("select", { class: "pb-select md-rate", "aria-label": t("speed"), id: "pb-rate" }, ["0.5", "0.75", "1", "1.25", "1.5", "2"].map((r) => h("option", { value: r, text: r + "×", selected: r === "1" })));
   rateSel.addEventListener("change", () => (media.playbackRate = +rateSel.value));
   stage.append(

@@ -21,7 +21,7 @@ The review page speaks the user's language, not the browser's, and follows the u
 - The app runs in a phone frame (390×844) on desktop viewers; on a phone it fills the viewer's own screen ("Auto"). Device switcher: Auto, Phone, Tablet 820×1180, Desktop 1280. Change `CFG.breakpoints` to the devices that matter (`[name, width, icon, height]`, icons: phone, tablet, laptop, desktop).
 - The app is fully usable. The floating **Comment** button (or C) switches to comment mode, which highlights the element under the cursor and pins a patch to it. Pins follow their element.
 - Screen picker for several entry points (`CFG.screens`). A screen can be a live HTML build or an image (`.png`, `/_blob/...`) of a native screen; on images, patches are points or dragged areas.
-- Camera button, paste or drop onto the stage: imports a screenshot (e.g. from the real device) as its own board to comment on.
+- Paste or drop onto the stage: imports a screenshot (e.g. from the real device) as its own board to comment on.
 
 Everything in the page is minimal and monochrome so it sits naturally next to Claude, and the work itself gets as much room as possible. There are no version labels and no shortcut hints in the UI. Shared across all Patchbook skills:
 - **Patches** panel: Open / Done with counts, numbered patches matching the pins, check to close, trash twice to delete, double-click to edit. For websites, apps, images and PDFs it is a sidebar on the right that collapses to a slim rail with the open count (on phones a bottom sheet that collapsed shows only the input). For audio and video there is no sidebar: the input sits right under the timeline and the patches list below it.
