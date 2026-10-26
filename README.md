@@ -24,7 +24,7 @@
   <img src="https://img.shields.io/badge/license-MIT-111?style=flat-square" alt="MIT license">
 </p>
 
-https://github.com/user-attachments/assets/074c7d26-7bd8-41db-af2d-65f7e7d21f18
+https://github.com/user-attachments/assets/d991be96-f751-4278-8875-ef65c290ce46
 
 
 <p align="center">
