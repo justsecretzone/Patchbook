@@ -24,13 +24,8 @@
   <img src="https://img.shields.io/badge/license-MIT-111?style=flat-square" alt="MIT license">
 </p>
 
-<p align="center">
-  <a href="https://github.com/justsecretzone/Patchbook/blob/main/docs/patchbook-pitch.mp4">
-    <img src="docs/pitch-poster.png" width="900" alt="Watch the Patchbook video">
-  </a>
-  <br>
-  <sub><a href="https://github.com/justsecretzone/Patchbook/blob/main/docs/patchbook-pitch.mp4">▶ Watch the 45-second video</a></sub>
-</p>
+https://github.com/user-attachments/assets/074c7d26-7bd8-41db-af2d-65f7e7d21f18
+
 
 <p align="center">
   <img src="docs/website.png" alt="Website review: the live site with pinned patches and the patches sidebar" width="900">
