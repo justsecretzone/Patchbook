@@ -25,6 +25,14 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/justsecretzone/Patchbook/blob/main/docs/patchbook-pitch.mp4">
+    <img src="docs/pitch-poster.png" width="900" alt="Watch the Patchbook video">
+  </a>
+  <br>
+  <sub><a href="https://github.com/justsecretzone/Patchbook/blob/main/docs/patchbook-pitch.mp4">▶ Watch the 45-second video</a></sub>
+</p>
+
+<p align="center">
   <img src="docs/website.png" alt="Website review: the live site with pinned patches and the patches sidebar" width="900">
 </p>
 
@@ -139,7 +147,7 @@ src/
 install/patchbook/SKILL.md        compact edition, installed from a chat in one click
 INSTALL.md                        install steps Claude follows
 .claude-plugin/                   Claude Code plugin and marketplace manifest
-docs/                             logo and screenshots
+docs/                             logo, screenshots and the Patchbook video
 ```
 
 To change a review page, edit `src/`, run `python3 src/build.py` and commit both.
