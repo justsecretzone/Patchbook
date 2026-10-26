@@ -154,7 +154,7 @@ Issues and pull requests are welcome. Please describe what you reviewed (website
 
 Patchbook is an independent open-source project and is not affiliated with, endorsed by or sponsored by Anthropic or OpenAI. Claude is a trademark of Anthropic, ChatGPT is a trademark of OpenAI.
 
-- The screenshots in this README show made-up example content (a fictional cabin rental called "Fjordlys"). The repository contains no demo content; the skills create a review page for your own work.
+- The screenshots in this README show made-up example content (a fictional invoicing startup called "Kitebase": its website, app, seed deck, ad, demo video and jingle). The repository contains no demo content; the skills create a review page for your own work.
 - Review pages are published as artifacts in your own Claude account. Patches and screenshots are stored there and are visible to anyone you share the page with. Don't attach screenshots with sensitive data to pages you share.
 - Features depend on what your Claude plan and app version offer (skills, artifacts, code execution). Outside Claude only the local mode is available.
 - Provided as is, without warranty, under the MIT license.
