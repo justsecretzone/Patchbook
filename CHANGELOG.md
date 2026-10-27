@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.3.1
+
+- On phones the work goes edge to edge: no outer margin, no rounded stage, the patches panel docks flat to the bottom.
+- A breakpoint as wide as the view (for example Mobile on a phone) now fills the full width instead of shrinking with a margin.
+
 ## 1.3.0
 
 - Done patches get a green check, on the pin and in the list.

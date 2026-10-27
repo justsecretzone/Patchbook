@@ -52,7 +52,8 @@
       Object.assign(frame.style, { width: r.width + "px", height: r.height + "px", transform: "none", left: "0px", top: "0px" });
       widthOut.textContent = Math.round(r.width) + " px";
     } else {
-      const pad = r.width < 500 ? 10 : 24, bez = device ? 24 : 0;
+      const bez = device ? 24 : 0; let pad = r.width < 500 ? 10 : 24;
+      if (!device && bp.w + pad * 2 > r.width) pad = 0; // use every pixel when the breakpoint is as wide as the view
       const dh = device ? (bp.h || Math.round(bp.w * 2.16)) : 0;
       let s = Math.min(1, (r.width - pad * 2) / (bp.w + bez));
       if (device) s = Math.min(s, (r.height - pad * 2) / (dh + bez));

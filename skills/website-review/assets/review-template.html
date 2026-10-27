@@ -46,7 +46,7 @@
 }
 
 [hidden] { display: none !important; }
-html, body { height: 100%; }
+html, body { height: 100%; margin: 0; padding: 0; }
 body { background: var(--bg); color: var(--ink); font: 14px/1.45 var(--font); -webkit-font-smoothing: antialiased; }
 button { font: inherit; color: inherit; }
 :focus, :focus-visible { outline: none; }
@@ -65,6 +65,13 @@ button { font: inherit; color: inherit; }
 #pb-app.collapsed { grid-template-columns: minmax(0, 1fr) 52px; }
 @media (max-width: 860px) {
   #pb-app, #pb-app.collapsed { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; gap: 8px; padding-block: 8px; }
+}
+/* phones: the work goes edge to edge, the patches panel docks to the bottom */
+@media (max-width: 860px) {
+  #pb-app:not(.below), #pb-app.collapsed:not(.below) { padding: 0 env(safe-area-inset-right, 0px) 0 env(safe-area-inset-left, 0px); gap: 0; }
+  #pb-app:not(.below) .pb-stage { border-radius: 0; }
+  #pb-app:not(.below) #pb-side { border-radius: 16px 16px 0 0; border-width: 1px 0 0; padding-bottom: env(safe-area-inset-bottom, 0px); }
+  #pb-app:not(.below) .pb-bar { padding: 6px 8px; }
 }
 @media (prefers-reduced-motion: reduce) { #pb-app { transition: none; } }
 
@@ -1201,7 +1208,8 @@ const PB = (() => {
       Object.assign(frame.style, { width: r.width + "px", height: r.height + "px", transform: "none", left: "0px", top: "0px" });
       widthOut.textContent = Math.round(r.width) + " px";
     } else {
-      const pad = r.width < 500 ? 10 : 24, bez = device ? 24 : 0;
+      const bez = device ? 24 : 0; let pad = r.width < 500 ? 10 : 24;
+      if (!device && bp.w + pad * 2 > r.width) pad = 0; // use every pixel when the breakpoint is as wide as the view
       const dh = device ? (bp.h || Math.round(bp.w * 2.16)) : 0;
       let s = Math.min(1, (r.width - pad * 2) / (bp.w + bez));
       if (device) s = Math.min(s, (r.height - pad * 2) / (dh + bez));
