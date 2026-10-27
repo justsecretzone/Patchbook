@@ -3,7 +3,7 @@
 <style>
 /*@core.css*/
 .pd-scroll { flex: 1; min-height: 0; overflow: auto; position: relative; }
-.pd-pages { display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 22px 16px 40px; min-width: min-content; }
+.pd-pages { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 8px 8px 32px; min-width: min-content; }
 .pd-page { position: relative; background: #fff; box-shadow: var(--shadow), 0 0 0 1px var(--line); border-radius: 2px; flex: none; }
 .pd-page canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .pd-layer { position: absolute; inset: 0; pointer-events: none; }
@@ -61,7 +61,7 @@ const CFG = {
     }
     fit(); io(); draw(); updatePos();
   }
-  function fit() { const r = scroller.getBoundingClientRect(); const maxW = Math.max(...pages.map((p) => p.w)); fitW = Math.min(1.6, (r.width - 40) / maxW); k = 1; size(); }
+  function fit() { const r = scroller.getBoundingClientRect(); const maxW = Math.max(...pages.map((p) => p.w)); fitW = Math.min(2.5, (r.width - 16) / maxW); k = 1; size(); }
   function zoom(f) {
     if (!pages.length) return;
     const anchorY = (scroller.scrollTop + scroller.clientHeight / 2) / scroller.scrollHeight;

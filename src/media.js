@@ -85,6 +85,16 @@
   const loop = () => { tick(); if (!media.paused) raf = requestAnimationFrame(loop); };
   media.addEventListener("play", () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(loop); });
   for (const ev of ["pause", "seeked", "loadedmetadata", "durationchange", "ended"]) media.addEventListener(ev, () => { if (ev === "loadedmetadata") tl.reset(true); tick(); });
+  // video: size the player to the picture so it gets the largest possible area without letterboxing
+  function fitStage() {
+    if (!isVideo || !media.videoWidth) return;
+    const app = document.getElementById("pb-app"), stageEl = viewer.parentElement; if (!app || !stageEl) return;
+    const chrome = stageEl.getBoundingClientRect().height - viewer.getBoundingClientRect().height;
+    const w = stageEl.getBoundingClientRect().width, natural = w * media.videoHeight / media.videoWidth + chrome;
+    const h = Math.round(Math.max(260, Math.min(natural, innerHeight - (innerWidth < 861 ? 96 : 140))));
+    app.style.setProperty("--stage-h", h + "px"); app.style.setProperty("--stage-h-m", h + "px");
+  }
+  media.addEventListener("loadedmetadata", fitStage); addEventListener("resize", fitStage);
   playBtn.addEventListener("click", toggle);
   if (isVideo) media.addEventListener("click", toggle);
   function toggle() { if (!media.src) return; media.paused ? media.play().catch(() => {}) : media.pause(); }

@@ -53,18 +53,16 @@ button { font: inherit; color: inherit; }
 
 #pb-app {
   height: 100%; box-sizing: border-box;
-  display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 12px; transition: grid-template-columns .2s ease;
-  padding-block: 12px;
-  padding-left: max(16px, env(safe-area-inset-left, 0px));
-  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 0; transition: grid-template-columns .2s ease;
+  padding: 0 env(safe-area-inset-right, 0px) 0 env(safe-area-inset-left, 0px);
 }
 .pb-stage {
   position: relative; min-width: 0; min-height: 0; display: flex; flex-direction: column;
-  background: var(--stage); border-radius: var(--r); overflow: hidden;
+  background: var(--stage); border-radius: 0; overflow: hidden;
 }
 #pb-app.collapsed { grid-template-columns: minmax(0, 1fr) 52px; }
 @media (max-width: 860px) {
-  #pb-app, #pb-app.collapsed { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; gap: 8px; padding-block: 8px; }
+  #pb-app, #pb-app.collapsed { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; gap: 0; }
 }
 /* phones: the work goes edge to edge, the patches panel docks to the bottom */
 @media (max-width: 860px) {
@@ -140,7 +138,7 @@ button { font: inherit; color: inherit; }
 /* ---------- sidebar ---------- */
 #pb-side {
   min-width: 0; min-height: 0; display: flex; flex-direction: column;
-  background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden;
+  background: var(--panel); border: 0; border-left: 1px solid var(--line); border-radius: 0; overflow: hidden;
 }
 .pb-rail { display: none; }
 .pb-sum { display: none; }
@@ -162,7 +160,7 @@ button { font: inherit; color: inherit; }
   .pb-head .pb-toggle { order: 3; }
 }
 @media (max-width: 860px) {
-  #pb-side { border-radius: var(--r); }
+  #pb-side { border-radius: 16px 16px 0 0; border: 0; border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom, 0px); }
   .pb-head { cursor: pointer; padding: 8px 8px 8px 14px; }
   .pb-title { font-size: 15px; }
   .pb-sum { display: inline; font: 400 12px var(--font); color: var(--muted); margin-left: 2px; }
@@ -320,16 +318,17 @@ button { font: inherit; color: inherit; }
 
 /* ---------- patches below the work (audio, video) ---------- */
 #pb-app.below { height: auto; min-height: 100%; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto; align-content: start; }
-#pb-app.below .pb-stage { height: var(--stage-h, 66vh); min-height: 300px; }
+#pb-app.below .pb-stage { height: var(--stage-h, 66vh); min-height: 260px; }
+#pb-app.below #pb-side { padding: 0 max(14px, env(safe-area-inset-right, 0px)) 18px max(14px, env(safe-area-inset-left, 0px)); }
 #pb-app.below #pb-side > .pb-rail, #pb-app.below .pb-toggle { display: none !important; }
-#pb-app.below #pb-side { border: 0; background: transparent; overflow: visible; }
+#pb-app.below #pb-side { border: 0; border-radius: 0; background: transparent; overflow: visible; }
 #pb-app.below .pb-foot { order: -1; border-top: 0; padding: 0 0 4px; }
 #pb-app.below .pb-head { border-bottom: 0; padding: 10px 2px 4px; cursor: default; }
 #pb-app.below .pb-list { max-height: none; overflow: visible; padding: 0; min-height: 0; }
 #pb-app.below .pb-list, #pb-app.below .pb-handoff, #pb-app.below .pb-head .pb-seg { display: flex !important; }
 #pb-app.below .pb-sum { display: none !important; }
 #pb-app.below .pb-empty { padding: 18px; }
-@media (max-width: 860px) { #pb-app.below .pb-stage { height: var(--stage-h-m, 56vh); } }
+@media (max-width: 860px) { #pb-app.below .pb-stage { height: var(--stage-h-m, var(--stage-h, 56vh)); } }
 
 .pb-scope { align-self: flex-start; margin: 6px 10px 4px; border: 0; background: none; padding: 4px 0; font-size: 12px; color: var(--muted); cursor: pointer; text-decoration: underline; text-decoration-color: var(--line-strong); text-underline-offset: 3px; }
 .pb-scope:hover { color: var(--ink); }
@@ -930,7 +929,7 @@ const PB = (() => {
     function fit() {
       if (!W) return;
       const r = host.getBoundingClientRect();
-      z = Math.min((r.width - 40) / W, (r.height - 40) / H, 2); if (!(z > 0)) z = 1;
+      const m = r.width < 600 ? 8 : 16; z = Math.min((r.width - m * 2) / W, (r.height - m * 2) / H, 4); if (!(z > 0)) z = 1;
       tx = (r.width - W * z) / 2; ty = (r.height - H * z) / 2; fitted = true; apply();
     }
     function zoomAt(f, cx, cy) { const nz = clamp(z * f, 0.05, 10); tx = cx - (cx - tx) * (nz / z); ty = cy - (cy - ty) * (nz / z); z = nz; fitted = false; apply(); }
@@ -1237,6 +1236,16 @@ const PB = (() => {
   const loop = () => { tick(); if (!media.paused) raf = requestAnimationFrame(loop); };
   media.addEventListener("play", () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(loop); });
   for (const ev of ["pause", "seeked", "loadedmetadata", "durationchange", "ended"]) media.addEventListener(ev, () => { if (ev === "loadedmetadata") tl.reset(true); tick(); });
+  // video: size the player to the picture so it gets the largest possible area without letterboxing
+  function fitStage() {
+    if (!isVideo || !media.videoWidth) return;
+    const app = document.getElementById("pb-app"), stageEl = viewer.parentElement; if (!app || !stageEl) return;
+    const chrome = stageEl.getBoundingClientRect().height - viewer.getBoundingClientRect().height;
+    const w = stageEl.getBoundingClientRect().width, natural = w * media.videoHeight / media.videoWidth + chrome;
+    const h = Math.round(Math.max(260, Math.min(natural, innerHeight - (innerWidth < 861 ? 96 : 140))));
+    app.style.setProperty("--stage-h", h + "px"); app.style.setProperty("--stage-h-m", h + "px");
+  }
+  media.addEventListener("loadedmetadata", fitStage); addEventListener("resize", fitStage);
   playBtn.addEventListener("click", toggle);
   if (isVideo) media.addEventListener("click", toggle);
   function toggle() { if (!media.src) return; media.paused ? media.play().catch(() => {}) : media.pause(); }

@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.3.2
+
+- The work always gets the largest possible area: no outer margins on desktop or phones, the patches panel sits flush next to or below it.
+- Breakpoints use the full height, images and PDF pages fit with a minimal margin, videos get a player sized to their picture.
+
 ## 1.3.1
 
 - On phones the work goes edge to edge: no outer margin, no rounded stage, the patches panel docks flat to the bottom.

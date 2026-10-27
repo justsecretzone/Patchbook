@@ -554,7 +554,7 @@ const PB = (() => {
     function fit() {
       if (!W) return;
       const r = host.getBoundingClientRect();
-      z = Math.min((r.width - 40) / W, (r.height - 40) / H, 2); if (!(z > 0)) z = 1;
+      const m = r.width < 600 ? 8 : 16; z = Math.min((r.width - m * 2) / W, (r.height - m * 2) / H, 4); if (!(z > 0)) z = 1;
       tx = (r.width - W * z) / 2; ty = (r.height - H * z) / 2; fitted = true; apply();
     }
     function zoomAt(f, cx, cy) { const nz = clamp(z * f, 0.05, 10); tx = cx - (cx - tx) * (nz / z); ty = cy - (cy - ty) * (nz / z); z = nz; fitted = false; apply(); }
