@@ -15,4 +15,4 @@
   position: absolute; transform: translateX(-50%); z-index: 12; height: 28px; padding: 0 12px; border-radius: 999px; border: 0;
   background: var(--accent); color: var(--on-accent); font: 600 12px var(--font); cursor: pointer; box-shadow: 0 4px 14px rgba(0, 0, 0, .22);
 }
-.if-edge.down { bottom: 70px; }
+.if-edge.down { bottom: 64px; }

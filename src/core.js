@@ -496,11 +496,17 @@ const PB = (() => {
     ui.fab = h("button", { class: "pb-fab", id: "pb-fab", "aria-pressed": "false", title: t("comment"), onclick: () => setMode(S.mode === "comment" ? "browse" : "comment") },
       h("span", { class: "pb-fab-ico", html: I.comment }), ui.fabLabel);
     host.append(ui.fab);
+    fabPeek(3500);
+    ui.fab.addEventListener("pointerenter", (e) => { if (e.pointerType === "mouse") ui.fab.classList.remove("mini"); });
+    ui.fab.addEventListener("pointerleave", (e) => { if (e.pointerType === "mouse") fabPeek(600); });
   }
+  // the label shows for a moment, then the button shrinks to its icon
+  let fabT = 0;
+  function fabPeek(ms) { if (!ui.fab) return; ui.fab.classList.remove("mini"); clearTimeout(fabT); fabT = setTimeout(() => ui.fab.classList.add("mini"), ms); }
   function setMode(m) {
     if (S.readonly && m === "comment") return;
     S.mode = m;
-    if (ui.fab) { const on = m === "comment"; ui.fab.setAttribute("aria-pressed", String(on)); ui.fab.querySelector(".pb-fab-ico").innerHTML = on ? I.x : I.comment; ui.fabLabel.textContent = on ? t("tapSpot") : t("comment"); }
+    if (ui.fab) { const on = m === "comment"; ui.fab.setAttribute("aria-pressed", String(on)); ui.fab.querySelector(".pb-fab-ico").innerHTML = on ? I.x : I.comment; ui.fabLabel.textContent = on ? t("tapSpot") : t("comment"); ui.fab.title = ui.fabLabel.textContent; fabPeek(on ? 2600 : 1200); }
     if (m === "browse" && S.draft.anchor) clearDraft();
     O.onMode && O.onMode(m);
   }

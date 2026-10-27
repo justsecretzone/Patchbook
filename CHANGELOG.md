@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.3.3
+
+- The Comment button shows its label for a moment, then shrinks to its icon. It sits right above the comment field on phones.
+- Slimmer toolbar and a tighter bottom edge on phones.
+
 ## 1.3.2
 
 - The work always gets the largest possible area: no outer margins on desktop or phones, the patches panel sits flush next to or below it.

@@ -68,8 +68,12 @@ button { font: inherit; color: inherit; }
 @media (max-width: 860px) {
   #pb-app:not(.below), #pb-app.collapsed:not(.below) { padding: 0 env(safe-area-inset-right, 0px) 0 env(safe-area-inset-left, 0px); gap: 0; }
   #pb-app:not(.below) .pb-stage { border-radius: 0; }
-  #pb-app:not(.below) #pb-side { border-radius: 16px 16px 0 0; border-width: 1px 0 0; padding-bottom: env(safe-area-inset-bottom, 0px); }
-  #pb-app:not(.below) .pb-bar { padding: 6px 8px; }
+  #pb-app:not(.below) #pb-side { border-radius: 16px 16px 0 0; border-width: 1px 0 0; padding-bottom: max(4px, calc(env(safe-area-inset-bottom, 0px) - 14px)); }
+  #pb-app.collapsed:not(.below) .pb-head { padding-top: 6px; padding-bottom: 2px; }
+  #pb-app.collapsed:not(.below) .pb-foot { padding: 6px 10px 8px; }
+  #pb-app:not(.below) .pb-fab { bottom: 10px; }
+  #pb-app:not(.below) .pb-bar { padding: 4px 6px; gap: 6px; min-height: 0; }
+  #pb-app:not(.below) .pb-bar .pb-seg button { padding: 4px 7px; }
 }
 @media (prefers-reduced-motion: reduce) { #pb-app { transition: none; } }
 
@@ -160,7 +164,7 @@ button { font: inherit; color: inherit; }
   .pb-head .pb-toggle { order: 3; }
 }
 @media (max-width: 860px) {
-  #pb-side { border-radius: 16px 16px 0 0; border: 0; border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom, 0px); }
+  #pb-side { border-radius: 16px 16px 0 0; border: 0; border-top: 1px solid var(--line); }
   .pb-head { cursor: pointer; padding: 8px 8px 8px 14px; }
   .pb-title { font-size: 15px; }
   .pb-sum { display: inline; font: 400 12px var(--font); color: var(--muted); margin-left: 2px; }
@@ -313,7 +317,11 @@ button { font: inherit; color: inherit; }
 }
 .pb-fab:hover { border-color: var(--ink); }
 .pb-fab[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: transparent; }
-.pb-fab-ico { width: 18px; height: 18px; display: grid; place-items: center; }
+.pb-fab-ico { width: 18px; height: 18px; display: grid; place-items: center; flex: none; }
+.pb-fab { transition: background .15s, color .15s, padding .28s cubic-bezier(.2,.8,.2,1), gap .28s; }
+.pb-fab-label { display: inline-block; overflow: hidden; max-width: 260px; opacity: 1; transition: max-width .3s cubic-bezier(.2,.8,.2,1), opacity .2s; }
+.pb-fab.mini { padding: 0 13px; gap: 0; }
+.pb-fab.mini .pb-fab-label { max-width: 0; opacity: 0; }
 .pb-fab-ico svg { width: 18px; height: 18px; }
 
 /* ---------- patches below the work (audio, video) ---------- */
@@ -857,11 +865,17 @@ const PB = (() => {
     ui.fab = h("button", { class: "pb-fab", id: "pb-fab", "aria-pressed": "false", title: t("comment"), onclick: () => setMode(S.mode === "comment" ? "browse" : "comment") },
       h("span", { class: "pb-fab-ico", html: I.comment }), ui.fabLabel);
     host.append(ui.fab);
+    fabPeek(3500);
+    ui.fab.addEventListener("pointerenter", (e) => { if (e.pointerType === "mouse") ui.fab.classList.remove("mini"); });
+    ui.fab.addEventListener("pointerleave", (e) => { if (e.pointerType === "mouse") fabPeek(600); });
   }
+  // the label shows for a moment, then the button shrinks to its icon
+  let fabT = 0;
+  function fabPeek(ms) { if (!ui.fab) return; ui.fab.classList.remove("mini"); clearTimeout(fabT); fabT = setTimeout(() => ui.fab.classList.add("mini"), ms); }
   function setMode(m) {
     if (S.readonly && m === "comment") return;
     S.mode = m;
-    if (ui.fab) { const on = m === "comment"; ui.fab.setAttribute("aria-pressed", String(on)); ui.fab.querySelector(".pb-fab-ico").innerHTML = on ? I.x : I.comment; ui.fabLabel.textContent = on ? t("tapSpot") : t("comment"); }
+    if (ui.fab) { const on = m === "comment"; ui.fab.setAttribute("aria-pressed", String(on)); ui.fab.querySelector(".pb-fab-ico").innerHTML = on ? I.x : I.comment; ui.fabLabel.textContent = on ? t("tapSpot") : t("comment"); ui.fab.title = ui.fabLabel.textContent; fabPeek(on ? 2600 : 1200); }
     if (m === "browse" && S.draft.anchor) clearDraft();
     O.onMode && O.onMode(m);
   }
