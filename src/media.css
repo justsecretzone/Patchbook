@@ -15,5 +15,8 @@
 .md-play svg { width: 15px; height: 15px; }
 .md-time { font: 12px var(--mono); color: var(--muted); }
 .md-rate { padding: 3px 6px; font-size: 12px; }
-.md-tl { margin-top: 22px; }
+/* the timeline grows upward over the player while held, so nothing below or above it reflows */
+.md-tlw { position: relative; height: 74px; margin-top: 22px; }
+.md-tl { position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; background: var(--panel); border-radius: 10px 10px 0 0; }
+.md-tl.tl-big { box-shadow: 0 -10px 24px rgba(0, 0, 0, .08); }
 @media (max-width: 560px) { .md-keys { display: none; } }

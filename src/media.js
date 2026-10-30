@@ -4,7 +4,8 @@
   const isVideo = CFG.kind === "video";
   const stage = document.querySelector(".pb-stage");
   const media = h(isVideo ? "video" : "audio", { preload: "auto", playsinline: true, id: "pb-media" });
-  if (isVideo) media.setAttribute("crossorigin", "anonymous");
+  // no crossorigin: sources without CORS headers would fail to play
+  media.setAttribute("playsinline", ""); media.setAttribute("webkit-playsinline", "");
   const fps = CFG.fps || 25;
   const dur = () => (isFinite(media.duration) && media.duration) || CFG.duration || 0;
   const playBtn = h("button", { class: "md-play", "aria-label": t("play"), html: I.play });
@@ -17,7 +18,7 @@
   rateSel.addEventListener("change", () => (media.playbackRate = +rateSel.value));
   stage.append(
     viewer,
-    h("div", { class: "md-controls" }, h("div", { class: "md-row" }, playBtn, time, h("span", { class: "pb-grow" }), rateSel), tlHost));
+    h("div", { class: "md-controls" }, h("div", { class: "md-row" }, playBtn, time, h("span", { class: "pb-grow" }), rateSel), h("div", { class: "md-tlw" }, tlHost)));
 
   if (CFG.src) media.src = CFG.src; else { empty.hidden = false; media.hidden = true; }
   if (!isVideo) {
@@ -75,16 +76,28 @@
     onScrubStart: () => media.pause(),
     onRange: (a, b) => { media.pause(); seek(a); const an = anchorFor(a, b); PB.setDraft(an, fullLabel(an)); },
   });
-  function seek(tt) { media.currentTime = clamp(tt, 0, dur() || 0); tick(); }
-  function tick() {
-    time.textContent = fmtTime(media.currentTime, true) + " / " + fmtTime(dur());
-    playBtn.innerHTML = media.paused ? I.play : I.pause;
-    tl.draw(); drawBig(); PB.refreshChip();
+  function seek(tt) {
+    const v = clamp(tt, 0, dur() || 0);
+    try { media.currentTime = v; } catch {}
+    // a draft that took the playhead automatically follows deliberate seeks
+    if (S.draft.auto && S.draft.anchor && S.draft.anchor.t2 == null) { const a = anchorFor(v); S.draft.anchor = a; S.draft.label = fullLabel(a); lastChip = ""; }
+    tick(v);
+  }
+  let lastChip = "", lastPaused = null;
+  function tick(at) {
+    const now = at != null ? at : media.currentTime;
+    time.textContent = fmtTime(now, true) + " / " + fmtTime(dur());
+    if (lastPaused !== media.paused) { lastPaused = media.paused; playBtn.innerHTML = media.paused ? I.play : I.pause; playBtn.setAttribute("aria-label", t(media.paused ? "play" : "pause")); }
+    tl.draw(); drawBig();
+    // only touch the composer when its label actually changes, not on every frame
+    const chip = S.draft.anchor ? S.draft.label : (dur() ? fullLabel(anchorFor(now)) : "");
+    if (chip !== lastChip) { lastChip = chip; PB.refreshChip(); }
   }
   let raf = 0;
   const loop = () => { tick(); if (!media.paused) raf = requestAnimationFrame(loop); };
   media.addEventListener("play", () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(loop); });
-  for (const ev of ["pause", "seeked", "loadedmetadata", "durationchange", "ended"]) media.addEventListener(ev, () => { if (ev === "loadedmetadata") tl.reset(true); tick(); });
+  for (const ev of ["pause", "playing", "seeked", "loadedmetadata", "durationchange", "ended"]) media.addEventListener(ev, () => { if (ev === "loadedmetadata") tl.reset(true); tick(); });
+  media.addEventListener("error", () => { if (CFG.src) PB.toast(t("uploadFail")); tick(); });
   // video: size the player to the picture so it gets the largest possible area without letterboxing
   function fitStage() {
     if (!isVideo || !media.videoWidth) return;
@@ -93,11 +106,22 @@
     const w = stageEl.getBoundingClientRect().width, natural = w * media.videoHeight / media.videoWidth + chrome;
     const h = Math.round(Math.max(260, Math.min(natural, innerHeight - (innerWidth < 861 ? 96 : 140))));
     app.style.setProperty("--stage-h", h + "px"); app.style.setProperty("--stage-h-m", h + "px");
+    fitW = innerWidth;
   }
-  media.addEventListener("loadedmetadata", fitStage); addEventListener("resize", fitStage);
+  // Refit only when the width changes: the phone keyboard shrinks the height and must not make the player jump.
+  let fitW = 0;
+  media.addEventListener("loadedmetadata", fitStage);
+  addEventListener("resize", () => { if (innerWidth !== fitW) fitStage(); });
   playBtn.addEventListener("click", toggle);
   if (isVideo) media.addEventListener("click", toggle);
-  function toggle() { if (!media.src) return; media.paused ? media.play().catch(() => {}) : media.pause(); }
+  let toggledAt = 0;
+  function toggle() {
+    if (!media.src) return;
+    const now = performance.now(); if (now - toggledAt < 250) return; toggledAt = now; // one tap, one toggle
+    if (media.paused) { if (media.ended) media.currentTime = 0; const p = media.play(); if (p && p.catch) p.catch(() => tick()); }
+    else media.pause();
+    tick();
+  }
 
   function grabFrame() {
     if (!media.videoWidth) return;
@@ -110,8 +134,12 @@
   PB.boot({
     kind: CFG.kind, timeBased: true, layout: "below",
     defaultAnchor: () => (dur() ? { anchor: anchorFor(media.currentTime), label: fullLabel(anchorFor(media.currentTime)) } : null),
-    onTyping: () => { if (!media.paused) media.pause(); },
-    onChange: () => tl.draw(),
+    // Typing pauses and pins the draft to this moment, so the patch lands where the user started writing.
+    onTyping: () => {
+      if (!media.paused) media.pause();
+      if (!S.draft.anchor && !S.draft.general && dur()) { const a = anchorFor(media.currentTime); S.draft.anchor = a; S.draft.label = fullLabel(a); S.draft.auto = true; PB.refreshChip(); tl.draw(); }
+    },
+    onChange: () => { lastChip = ""; tl.draw(); },
     composerExtra: () => grab,
     focus: (p) => { if (p.anchor && p.anchor.t != null) { media.pause(); seek(p.anchor.t); } },
     onKey: (e) => {

@@ -341,6 +341,14 @@ button { font: inherit; color: inherit; }
 .pb-scope { align-self: flex-start; margin: 6px 10px 4px; border: 0; background: none; padding: 4px 0; font-size: 12px; color: var(--muted); cursor: pointer; text-decoration: underline; text-decoration-color: var(--line-strong); text-underline-offset: 3px; }
 .pb-scope:hover { color: var(--ink); }
 .pb-empty + .pb-scope { align-self: center; margin-top: -8px; }
+
+
+/* Phones: inputs at 16px so iOS never zooms the page while typing; no double-tap zoom either */
+html, body { touch-action: manipulation; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+@media (pointer: coarse) {
+  input, textarea, select, [contenteditable="true"], [contenteditable=""] { font-size: 16px !important; }
+  .pb-ta { line-height: 22px; height: 22px; min-height: 22px; }
+}
 .pd-scroll { flex: 1; min-height: 0; overflow: auto; position: relative; }
 .pd-pages { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 8px 8px 32px; min-width: min-content; }
 .pd-page { position: relative; background: #fff; box-shadow: var(--shadow), 0 0 0 1px var(--line); border-radius: 2px; flex: none; }
@@ -377,7 +385,7 @@ const PB = (() => {
     de: {
       q1: "„", q2: "“", pages: "Seiten", screens: "Screens", reload: "Neu laden", pageWord: "Seite", noPages: "Noch keine Seite verknüpft", yourWidth: "deine Breite",
       elLink: "Link", elButton: "Button", elImage: "Bild", elVideo: "Video", elIcon: "Icon", elInput: "Eingabefeld", elSelect: "Auswahl", elNav: "Navigation", elHeader: "Kopfbereich", elFooter: "Fußbereich", elForm: "Formular", elHeading: "Überschrift", elElement: "Element",
-      attachFrame: "Frame anhängen", prev: "Zurück", next: "Weiter", zoomIn: "Vergrößern", zoomOut: "Verkleinern", play: "Abspielen", speed: "Tempo",
+      attachFrame: "Frame anhängen", prev: "Zurück", next: "Weiter", zoomIn: "Vergrößern", zoomOut: "Verkleinern", play: "Abspielen", pause: "Pause", speed: "Tempo",
       patches: "Patches", open: "Offen", openN: "offen", collapse: "Patches einklappen", expand: "Patches ausklappen", done: "Erledigt", working: "Claude arbeitet daran",
       placeholder: "Was soll sich ändern?", general: "Allgemein", browse: "Ansehen", comment: "Kommentieren",
       emptyOpen: "Noch keine Patches. Tippe auf Kommentieren und dann auf eine Stelle.", tapSpot: "Tippe auf eine Stelle",
@@ -395,7 +403,7 @@ const PB = (() => {
     en: {
       q1: "“", q2: "”", pages: "Pages", screens: "Screens", reload: "Reload", pageWord: "Page", noPages: "No page linked yet", yourWidth: "your width",
       elLink: "Link", elButton: "Button", elImage: "Image", elVideo: "Video", elIcon: "Icon", elInput: "Input", elSelect: "Dropdown", elNav: "Navigation", elHeader: "Header", elFooter: "Footer", elForm: "Form", elHeading: "Heading", elElement: "Element",
-      attachFrame: "Attach frame", prev: "Previous", next: "Next", zoomIn: "Zoom in", zoomOut: "Zoom out", play: "Play", speed: "Speed",
+      attachFrame: "Attach frame", prev: "Previous", next: "Next", zoomIn: "Zoom in", zoomOut: "Zoom out", play: "Play", pause: "Pause", speed: "Speed",
       patches: "Patches", open: "Open", openN: "open", collapse: "Collapse patches", expand: "Expand patches", done: "Done", working: "Claude is on it",
       placeholder: "What should change?", general: "General", browse: "Browse", comment: "Comment",
       emptyOpen: "No patches yet. Tap Comment, then tap a spot.", tapSpot: "Tap a spot",
@@ -634,12 +642,12 @@ const PB = (() => {
 
   // ---------- draft ----------
   function setDraft(anchor, label) {
-    S.draft.anchor = anchor; S.draft.label = label || ""; S.draft.general = false; S.sel = null;
+    S.draft.anchor = anchor; S.draft.label = label || ""; S.draft.general = false; S.draft.auto = false; S.sel = null;
     if (S.collapsed && !mobile()) setCollapsed(false, true);
     renderDraft(); changed(); if (ui.ta) { ui.ta.focus({ preventScroll: true }); setTimeout(() => document.activeElement !== ui.ta && ui.ta.focus({ preventScroll: true }), 0); }
   }
   function clearDraft(withShots) {
-    S.draft.anchor = null; S.draft.label = ""; S.draft.general = false;
+    S.draft.anchor = null; S.draft.label = ""; S.draft.general = false; S.draft.auto = false;
     if (withShots) S.draft.shots = [];
     renderDraft(); O.onChange && O.onChange();
   }
@@ -684,7 +692,7 @@ const PB = (() => {
     ui.list = h("div", { class: "pb-list", role: "list" });
     ui.ctxIcon = h("span", { class: "pb-ctx-ico" });
     ui.ctxText = h("span", { class: "pb-ctx-text" });
-    ui.ctxX = h("button", { class: "pb-ctx-x", title: t("removeAnchor"), "aria-label": t("removeAnchor"), html: I.x, onclick: () => { S.draft.anchor = null; S.draft.label = ""; S.draft.general = true; renderDraft(); O.onChange && O.onChange(); ui.ta.focus(); } });
+    ui.ctxX = h("button", { class: "pb-ctx-x", title: t("removeAnchor"), "aria-label": t("removeAnchor"), html: I.x, onclick: () => { S.draft.anchor = null; S.draft.label = ""; S.draft.general = true; S.draft.auto = false; renderDraft(); O.onChange && O.onChange(); ui.ta.focus(); } });
     ui.ctx = h("div", { class: "pb-ctx" }, ui.ctxIcon, ui.ctxText, ui.ctxX);
     ui.dshots = h("div", { class: "pb-dshots", hidden: true });
     ui.ta = h("textarea", { class: "pb-ta", id: "pb-text", rows: "1", placeholder: t("placeholder"), "aria-label": t("placeholder") });
@@ -1021,6 +1029,8 @@ const PB = (() => {
     const IW = () => Math.max(1, R.width - PAD * 2);
     const tToX = (tt) => PAD + ((tt - v0) / Math.max(1e-6, v1 - v0)) * IW();
     const xToT = (x) => clamp(v0 + ((x - PAD) / IW()) * (v1 - v0), 0, dur());
+    // while the zoom animates, map the finger against the target view so scrubbing does not drift
+    const xToTT = (x) => { const a = target ? target[0] : v0, b = target ? target[1] : v1; return clamp(a + ((x - PAD) / IW()) * (b - a), 0, dur()); };
     function animate() {
       cancelAnimationFrame(raf);
       const step = () => {
@@ -1112,7 +1122,7 @@ const PB = (() => {
       if (dot) { select(dot.id, true); return; }
       host.setPointerCapture(e.pointerId);
       const t0 = xToT(x);
-      pd = { x, t0, mode: "pending", timer: setTimeout(() => {
+      pd = { x, y: ly(e), t0, touch: e.pointerType !== "mouse", mode: "pending", timer: setTimeout(() => {
         if (!pd || pd.mode !== "pending") return;
         pd.mode = "zoom";
         const span = Math.max(Math.min(dur(), 4), dur() * 0.08), c = t0;
@@ -1123,8 +1133,9 @@ const PB = (() => {
     host.addEventListener("pointermove", (e) => {
       const x = lx(e); hover = x;
       if (pd) {
-        if (pd.mode === "pending" && Math.abs(x - pd.x) > 6 && opts.onRange) { clearTimeout(pd.timer); pd.mode = "range"; }
-        if (pd.mode === "zoom") { opts.seek(xToT(x)); tip.hidden = false; tip.style.left = clamp(x, 24, R.width - 24) + "px"; tip.textContent = fmtTime(xToT(x), true); }
+        // a tap that wobbles a few pixels stays a tap; touch needs a clearer drag to start a range
+        if (pd.mode === "pending" && Math.abs(x - pd.x) > (pd.touch ? 16 : 6) && opts.onRange) { clearTimeout(pd.timer); pd.mode = "range"; }
+        if (pd.mode === "zoom") { const tt = xToTT(x); opts.seek(tt); tip.hidden = false; tip.style.left = clamp(x, 24, R.width - 24) + "px"; tip.textContent = fmtTime(tt, true); }
         if (pd.mode === "range") { const t1 = xToT(x); range = [Math.min(pd.t0, t1), Math.max(pd.t0, t1)]; }
       }
       draw();
@@ -1134,7 +1145,10 @@ const PB = (() => {
       if (!pd) return; clearTimeout(pd.timer);
       if (pd.mode === "pending") opts.seek(pd.t0);
       else if (pd.mode === "zoom") { host.classList.remove("tl-big"); reset(); }
-      else if (pd.mode === "range" && range) { if (range[1] - range[0] > 0.15) opts.onRange(range[0], range[1]); }
+      else if (pd.mode === "range" && range) {
+        const min = Math.max(0.3, (v1 - v0) * 0.02);
+        if (range[1] - range[0] >= min) opts.onRange(range[0], range[1]); else opts.seek(pd.t0);
+      }
       range = null; pd = null; tip.hidden = true; draw();
     };
     host.addEventListener("pointerup", up); host.addEventListener("pointercancel", up);

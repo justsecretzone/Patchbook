@@ -341,6 +341,14 @@ button { font: inherit; color: inherit; }
 .pb-scope { align-self: flex-start; margin: 6px 10px 4px; border: 0; background: none; padding: 4px 0; font-size: 12px; color: var(--muted); cursor: pointer; text-decoration: underline; text-decoration-color: var(--line-strong); text-underline-offset: 3px; }
 .pb-scope:hover { color: var(--ink); }
 .pb-empty + .pb-scope { align-self: center; margin-top: -8px; }
+
+
+/* Phones: inputs at 16px so iOS never zooms the page while typing; no double-tap zoom either */
+html, body { touch-action: manipulation; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+@media (pointer: coarse) {
+  input, textarea, select, [contenteditable="true"], [contenteditable=""] { font-size: 16px !important; }
+  .pb-ta { line-height: 22px; height: 22px; min-height: 22px; }
+}
 /* media surface */
 .md-title { font-size: 13px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
 .md-video { flex: 1; min-height: 0; display: flex; background: #0c0c0b; position: relative; }
@@ -358,7 +366,10 @@ button { font: inherit; color: inherit; }
 .md-play svg { width: 15px; height: 15px; }
 .md-time { font: 12px var(--mono); color: var(--muted); }
 .md-rate { padding: 3px 6px; font-size: 12px; }
-.md-tl { margin-top: 22px; }
+/* the timeline grows upward over the player while held, so nothing below or above it reflows */
+.md-tlw { position: relative; height: 74px; margin-top: 22px; }
+.md-tl { position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; background: var(--panel); border-radius: 10px 10px 0 0; }
+.md-tl.tl-big { box-shadow: 0 -10px 24px rgba(0, 0, 0, .08); }
 @media (max-width: 560px) { .md-keys { display: none; } }
 :root { --stage-h: 400px; --stage-h-m: 330px; }
 </style>
@@ -391,7 +402,7 @@ const PB = (() => {
     de: {
       q1: "„", q2: "“", pages: "Seiten", screens: "Screens", reload: "Neu laden", pageWord: "Seite", noPages: "Noch keine Seite verknüpft", yourWidth: "deine Breite",
       elLink: "Link", elButton: "Button", elImage: "Bild", elVideo: "Video", elIcon: "Icon", elInput: "Eingabefeld", elSelect: "Auswahl", elNav: "Navigation", elHeader: "Kopfbereich", elFooter: "Fußbereich", elForm: "Formular", elHeading: "Überschrift", elElement: "Element",
-      attachFrame: "Frame anhängen", prev: "Zurück", next: "Weiter", zoomIn: "Vergrößern", zoomOut: "Verkleinern", play: "Abspielen", speed: "Tempo",
+      attachFrame: "Frame anhängen", prev: "Zurück", next: "Weiter", zoomIn: "Vergrößern", zoomOut: "Verkleinern", play: "Abspielen", pause: "Pause", speed: "Tempo",
       patches: "Patches", open: "Offen", openN: "offen", collapse: "Patches einklappen", expand: "Patches ausklappen", done: "Erledigt", working: "Claude arbeitet daran",
       placeholder: "Was soll sich ändern?", general: "Allgemein", browse: "Ansehen", comment: "Kommentieren",
       emptyOpen: "Noch keine Patches. Tippe auf Kommentieren und dann auf eine Stelle.", tapSpot: "Tippe auf eine Stelle",
@@ -409,7 +420,7 @@ const PB = (() => {
     en: {
       q1: "“", q2: "”", pages: "Pages", screens: "Screens", reload: "Reload", pageWord: "Page", noPages: "No page linked yet", yourWidth: "your width",
       elLink: "Link", elButton: "Button", elImage: "Image", elVideo: "Video", elIcon: "Icon", elInput: "Input", elSelect: "Dropdown", elNav: "Navigation", elHeader: "Header", elFooter: "Footer", elForm: "Form", elHeading: "Heading", elElement: "Element",
-      attachFrame: "Attach frame", prev: "Previous", next: "Next", zoomIn: "Zoom in", zoomOut: "Zoom out", play: "Play", speed: "Speed",
+      attachFrame: "Attach frame", prev: "Previous", next: "Next", zoomIn: "Zoom in", zoomOut: "Zoom out", play: "Play", pause: "Pause", speed: "Speed",
       patches: "Patches", open: "Open", openN: "open", collapse: "Collapse patches", expand: "Expand patches", done: "Done", working: "Claude is on it",
       placeholder: "What should change?", general: "General", browse: "Browse", comment: "Comment",
       emptyOpen: "No patches yet. Tap Comment, then tap a spot.", tapSpot: "Tap a spot",
@@ -648,12 +659,12 @@ const PB = (() => {
 
   // ---------- draft ----------
   function setDraft(anchor, label) {
-    S.draft.anchor = anchor; S.draft.label = label || ""; S.draft.general = false; S.sel = null;
+    S.draft.anchor = anchor; S.draft.label = label || ""; S.draft.general = false; S.draft.auto = false; S.sel = null;
     if (S.collapsed && !mobile()) setCollapsed(false, true);
     renderDraft(); changed(); if (ui.ta) { ui.ta.focus({ preventScroll: true }); setTimeout(() => document.activeElement !== ui.ta && ui.ta.focus({ preventScroll: true }), 0); }
   }
   function clearDraft(withShots) {
-    S.draft.anchor = null; S.draft.label = ""; S.draft.general = false;
+    S.draft.anchor = null; S.draft.label = ""; S.draft.general = false; S.draft.auto = false;
     if (withShots) S.draft.shots = [];
     renderDraft(); O.onChange && O.onChange();
   }
@@ -698,7 +709,7 @@ const PB = (() => {
     ui.list = h("div", { class: "pb-list", role: "list" });
     ui.ctxIcon = h("span", { class: "pb-ctx-ico" });
     ui.ctxText = h("span", { class: "pb-ctx-text" });
-    ui.ctxX = h("button", { class: "pb-ctx-x", title: t("removeAnchor"), "aria-label": t("removeAnchor"), html: I.x, onclick: () => { S.draft.anchor = null; S.draft.label = ""; S.draft.general = true; renderDraft(); O.onChange && O.onChange(); ui.ta.focus(); } });
+    ui.ctxX = h("button", { class: "pb-ctx-x", title: t("removeAnchor"), "aria-label": t("removeAnchor"), html: I.x, onclick: () => { S.draft.anchor = null; S.draft.label = ""; S.draft.general = true; S.draft.auto = false; renderDraft(); O.onChange && O.onChange(); ui.ta.focus(); } });
     ui.ctx = h("div", { class: "pb-ctx" }, ui.ctxIcon, ui.ctxText, ui.ctxX);
     ui.dshots = h("div", { class: "pb-dshots", hidden: true });
     ui.ta = h("textarea", { class: "pb-ta", id: "pb-text", rows: "1", placeholder: t("placeholder"), "aria-label": t("placeholder") });
@@ -1035,6 +1046,8 @@ const PB = (() => {
     const IW = () => Math.max(1, R.width - PAD * 2);
     const tToX = (tt) => PAD + ((tt - v0) / Math.max(1e-6, v1 - v0)) * IW();
     const xToT = (x) => clamp(v0 + ((x - PAD) / IW()) * (v1 - v0), 0, dur());
+    // while the zoom animates, map the finger against the target view so scrubbing does not drift
+    const xToTT = (x) => { const a = target ? target[0] : v0, b = target ? target[1] : v1; return clamp(a + ((x - PAD) / IW()) * (b - a), 0, dur()); };
     function animate() {
       cancelAnimationFrame(raf);
       const step = () => {
@@ -1126,7 +1139,7 @@ const PB = (() => {
       if (dot) { select(dot.id, true); return; }
       host.setPointerCapture(e.pointerId);
       const t0 = xToT(x);
-      pd = { x, t0, mode: "pending", timer: setTimeout(() => {
+      pd = { x, y: ly(e), t0, touch: e.pointerType !== "mouse", mode: "pending", timer: setTimeout(() => {
         if (!pd || pd.mode !== "pending") return;
         pd.mode = "zoom";
         const span = Math.max(Math.min(dur(), 4), dur() * 0.08), c = t0;
@@ -1137,8 +1150,9 @@ const PB = (() => {
     host.addEventListener("pointermove", (e) => {
       const x = lx(e); hover = x;
       if (pd) {
-        if (pd.mode === "pending" && Math.abs(x - pd.x) > 6 && opts.onRange) { clearTimeout(pd.timer); pd.mode = "range"; }
-        if (pd.mode === "zoom") { opts.seek(xToT(x)); tip.hidden = false; tip.style.left = clamp(x, 24, R.width - 24) + "px"; tip.textContent = fmtTime(xToT(x), true); }
+        // a tap that wobbles a few pixels stays a tap; touch needs a clearer drag to start a range
+        if (pd.mode === "pending" && Math.abs(x - pd.x) > (pd.touch ? 16 : 6) && opts.onRange) { clearTimeout(pd.timer); pd.mode = "range"; }
+        if (pd.mode === "zoom") { const tt = xToTT(x); opts.seek(tt); tip.hidden = false; tip.style.left = clamp(x, 24, R.width - 24) + "px"; tip.textContent = fmtTime(tt, true); }
         if (pd.mode === "range") { const t1 = xToT(x); range = [Math.min(pd.t0, t1), Math.max(pd.t0, t1)]; }
       }
       draw();
@@ -1148,7 +1162,10 @@ const PB = (() => {
       if (!pd) return; clearTimeout(pd.timer);
       if (pd.mode === "pending") opts.seek(pd.t0);
       else if (pd.mode === "zoom") { host.classList.remove("tl-big"); reset(); }
-      else if (pd.mode === "range" && range) { if (range[1] - range[0] > 0.15) opts.onRange(range[0], range[1]); }
+      else if (pd.mode === "range" && range) {
+        const min = Math.max(0.3, (v1 - v0) * 0.02);
+        if (range[1] - range[0] >= min) opts.onRange(range[0], range[1]); else opts.seek(pd.t0);
+      }
       range = null; pd = null; tip.hidden = true; draw();
     };
     host.addEventListener("pointerup", up); host.addEventListener("pointercancel", up);
@@ -1169,7 +1186,8 @@ const PB = (() => {
   const isVideo = CFG.kind === "video";
   const stage = document.querySelector(".pb-stage");
   const media = h(isVideo ? "video" : "audio", { preload: "auto", playsinline: true, id: "pb-media" });
-  if (isVideo) media.setAttribute("crossorigin", "anonymous");
+  // no crossorigin: sources without CORS headers would fail to play
+  media.setAttribute("playsinline", ""); media.setAttribute("webkit-playsinline", "");
   const fps = CFG.fps || 25;
   const dur = () => (isFinite(media.duration) && media.duration) || CFG.duration || 0;
   const playBtn = h("button", { class: "md-play", "aria-label": t("play"), html: I.play });
@@ -1182,7 +1200,7 @@ const PB = (() => {
   rateSel.addEventListener("change", () => (media.playbackRate = +rateSel.value));
   stage.append(
     viewer,
-    h("div", { class: "md-controls" }, h("div", { class: "md-row" }, playBtn, time, h("span", { class: "pb-grow" }), rateSel), tlHost));
+    h("div", { class: "md-controls" }, h("div", { class: "md-row" }, playBtn, time, h("span", { class: "pb-grow" }), rateSel), h("div", { class: "md-tlw" }, tlHost)));
 
   if (CFG.src) media.src = CFG.src; else { empty.hidden = false; media.hidden = true; }
   if (!isVideo) {
@@ -1240,16 +1258,28 @@ const PB = (() => {
     onScrubStart: () => media.pause(),
     onRange: (a, b) => { media.pause(); seek(a); const an = anchorFor(a, b); PB.setDraft(an, fullLabel(an)); },
   });
-  function seek(tt) { media.currentTime = clamp(tt, 0, dur() || 0); tick(); }
-  function tick() {
-    time.textContent = fmtTime(media.currentTime, true) + " / " + fmtTime(dur());
-    playBtn.innerHTML = media.paused ? I.play : I.pause;
-    tl.draw(); drawBig(); PB.refreshChip();
+  function seek(tt) {
+    const v = clamp(tt, 0, dur() || 0);
+    try { media.currentTime = v; } catch {}
+    // a draft that took the playhead automatically follows deliberate seeks
+    if (S.draft.auto && S.draft.anchor && S.draft.anchor.t2 == null) { const a = anchorFor(v); S.draft.anchor = a; S.draft.label = fullLabel(a); lastChip = ""; }
+    tick(v);
+  }
+  let lastChip = "", lastPaused = null;
+  function tick(at) {
+    const now = at != null ? at : media.currentTime;
+    time.textContent = fmtTime(now, true) + " / " + fmtTime(dur());
+    if (lastPaused !== media.paused) { lastPaused = media.paused; playBtn.innerHTML = media.paused ? I.play : I.pause; playBtn.setAttribute("aria-label", t(media.paused ? "play" : "pause")); }
+    tl.draw(); drawBig();
+    // only touch the composer when its label actually changes, not on every frame
+    const chip = S.draft.anchor ? S.draft.label : (dur() ? fullLabel(anchorFor(now)) : "");
+    if (chip !== lastChip) { lastChip = chip; PB.refreshChip(); }
   }
   let raf = 0;
   const loop = () => { tick(); if (!media.paused) raf = requestAnimationFrame(loop); };
   media.addEventListener("play", () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(loop); });
-  for (const ev of ["pause", "seeked", "loadedmetadata", "durationchange", "ended"]) media.addEventListener(ev, () => { if (ev === "loadedmetadata") tl.reset(true); tick(); });
+  for (const ev of ["pause", "playing", "seeked", "loadedmetadata", "durationchange", "ended"]) media.addEventListener(ev, () => { if (ev === "loadedmetadata") tl.reset(true); tick(); });
+  media.addEventListener("error", () => { if (CFG.src) PB.toast(t("uploadFail")); tick(); });
   // video: size the player to the picture so it gets the largest possible area without letterboxing
   function fitStage() {
     if (!isVideo || !media.videoWidth) return;
@@ -1258,11 +1288,22 @@ const PB = (() => {
     const w = stageEl.getBoundingClientRect().width, natural = w * media.videoHeight / media.videoWidth + chrome;
     const h = Math.round(Math.max(260, Math.min(natural, innerHeight - (innerWidth < 861 ? 96 : 140))));
     app.style.setProperty("--stage-h", h + "px"); app.style.setProperty("--stage-h-m", h + "px");
+    fitW = innerWidth;
   }
-  media.addEventListener("loadedmetadata", fitStage); addEventListener("resize", fitStage);
+  // Refit only when the width changes: the phone keyboard shrinks the height and must not make the player jump.
+  let fitW = 0;
+  media.addEventListener("loadedmetadata", fitStage);
+  addEventListener("resize", () => { if (innerWidth !== fitW) fitStage(); });
   playBtn.addEventListener("click", toggle);
   if (isVideo) media.addEventListener("click", toggle);
-  function toggle() { if (!media.src) return; media.paused ? media.play().catch(() => {}) : media.pause(); }
+  let toggledAt = 0;
+  function toggle() {
+    if (!media.src) return;
+    const now = performance.now(); if (now - toggledAt < 250) return; toggledAt = now; // one tap, one toggle
+    if (media.paused) { if (media.ended) media.currentTime = 0; const p = media.play(); if (p && p.catch) p.catch(() => tick()); }
+    else media.pause();
+    tick();
+  }
 
   function grabFrame() {
     if (!media.videoWidth) return;
@@ -1275,8 +1316,12 @@ const PB = (() => {
   PB.boot({
     kind: CFG.kind, timeBased: true, layout: "below",
     defaultAnchor: () => (dur() ? { anchor: anchorFor(media.currentTime), label: fullLabel(anchorFor(media.currentTime)) } : null),
-    onTyping: () => { if (!media.paused) media.pause(); },
-    onChange: () => tl.draw(),
+    // Typing pauses and pins the draft to this moment, so the patch lands where the user started writing.
+    onTyping: () => {
+      if (!media.paused) media.pause();
+      if (!S.draft.anchor && !S.draft.general && dur()) { const a = anchorFor(media.currentTime); S.draft.anchor = a; S.draft.label = fullLabel(a); S.draft.auto = true; PB.refreshChip(); tl.draw(); }
+    },
+    onChange: () => { lastChip = ""; tl.draw(); },
     composerExtra: () => grab,
     focus: (p) => { if (p.anchor && p.anchor.t != null) { media.pause(); seek(p.anchor.t); } },
     onKey: (e) => {

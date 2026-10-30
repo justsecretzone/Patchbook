@@ -339,3 +339,10 @@ button { font: inherit; color: inherit; }
 .pb-scope:hover { color: var(--ink); }
 .pb-empty + .pb-scope { align-self: center; margin-top: -8px; }
 
+
+/* Phones: inputs at 16px so iOS never zooms the page while typing; no double-tap zoom either */
+html, body { touch-action: manipulation; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+@media (pointer: coarse) {
+  input, textarea, select, [contenteditable="true"], [contenteditable=""] { font-size: 16px !important; }
+  .pb-ta { line-height: 22px; height: 22px; min-height: 22px; }
+}

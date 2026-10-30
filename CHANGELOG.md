@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.3.4
+
+- Video and audio: playback starts and stops reliably (no CORS requirement on the source, one tap is one toggle, plays inline on iPhone).
+- A patch lands where you started writing: the playhead is pinned when you focus or type, and follows only when you deliberately seek.
+- A tap on the timeline that wobbles a few pixels stays a tap instead of becoming a range. Holding grows the timeline upward over the player, so nothing jumps.
+- The phone keyboard no longer resizes the player.
+- No more zooming in on phones while typing: all fields use 16px text on touch devices.
+- Skills no longer ask in chat before publishing, updating or deleting their review page; installing them is the permission.
+
 ## 1.3.3
 
 - The Comment button shows its label for a moment, then shrinks to its icon. It sits right above the comment field on phones.

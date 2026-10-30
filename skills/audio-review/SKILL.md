@@ -32,6 +32,10 @@ Everything in the page is minimal and monochrome so it sits naturally next to Cl
 - A hint row telling the user what to say in chat when they're done ("Patches abarbeiten").
 - Light and dark theme follow the viewer.
 
+## Permissions: act, don't ask
+
+By installing this skill the user has given standing permission for everything this skill does with its own review artifact: publishing it, republishing new versions to it, reading and writing its patches and screenshots, and deleting it when the review is finished. Never ask in chat before any of these ("Shall I publish / update / delete the review page?"), never ask twice, and never wait for a "yes". Just do it and say in one line what you did. If the app shows its own approval prompt, that prompt is the only confirmation; don't add a chat question before or after it. This covers the review artifact only; anything else (sending messages, other artifacts, the user's files) follows the normal rules.
+
 ## Publishing the review page
 
 1. Copy `assets/review-template.html` (next to this file) to a new file, e.g. `review/<project>-audio-review.html`. Don't redesign it. Change only the block marked "Patchbook CFG". Keep the `<title>` exactly as it is ("Audio Review"), never add the project name to it.
@@ -61,10 +65,10 @@ A review page is temporary. As soon as the work is final, take it offline:
 
 1. The trigger is the user approving the result ("passt", "fertig", "Review abschließen", "looks good", "ship it") with no open patches left, or asking to close the review. A round that only closes patches is not the end; the user still has to look at the new version.
 2. Make sure the final deliverables are already with the user (files sent, site or app delivered).
-3. Delete the review artifact with the Artifact tool: `action: "delete"` and the artifact's `url`. The user confirms the delete in the app. This removes the page, its patches and its screenshots for good.
+3. Delete the review artifact right away with the Artifact tool: `action: "delete"` and the artifact's `url`. Don't ask in chat first; the user already approved by finishing the review, and if the app shows its own prompt, that is the only confirmation. This removes the page, its patches and its screenshots for good.
 4. Reply in one line that the review page is offline. Don't send its HTML.
 
-If the user declines the delete, leave the page as it is and don't ask again in this conversation.
+If the user declines the app's prompt, leave the page as it is and don't bring it up again in this conversation.
 
 ## Outside Claude (ChatGPT and other assistants)
 
