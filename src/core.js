@@ -12,8 +12,8 @@ const PB = (() => {
       patches: "Patches", open: "Offen", openN: "offen", collapse: "Patches einklappen", expand: "Patches ausklappen", done: "Erledigt", working: "Claude arbeitet daran",
       placeholder: "Was soll sich ändern?", general: "Allgemein", browse: "Ansehen", comment: "Kommentieren",
       emptyOpen: "Noch keine Patches. Tippe auf Kommentieren und dann auf eine Stelle.", tapSpot: "Tippe auf eine Stelle",
-      emptyOpenTime: "Noch keine Patches. Einfach oben tippen, der Zeitstempel kommt automatisch.",
-      emptyDone: "Noch nichts erledigt.", otherPages: "+{n} auf anderen Seiten", otherImages: "+{n} auf anderen Bildern", thisPageOnly: "Nur diese Seite", thisImageOnly: "Nur dieses Bild",
+      emptyOpenTime: "Noch keine Patches. Schreib einfach los, der Zeitstempel kommt automatisch.", close: "Schließen", mediaFail: "Datei konnte nicht geladen werden",
+      emptyDone: "Noch nichts erledigt.", allDone: "Alles erledigt.", otherPages: "+{n} auf anderen Seiten", otherImages: "+{n} auf anderen Bildern", thisPageOnly: "Nur diese Seite", thisImageOnly: "Nur dieses Bild",
       attach: "Screenshot anhängen", drop: "Screenshot hier ablegen", local: "Patches bleiben in diesem Browser.",
       readonly: "Nur Lesen. Zum Kommentieren braucht es Bearbeitungsrechte.",
       handoff: "Fertig? Schreib Claude:", handoffText: "Patches abarbeiten", handoffLocal: "Fertig? Kopieren und in den Chat einfügen:", copyPatches: "Patches kopieren", shotNote: "Screenshot im Chat anhängen", copied: "Kopiert", copy: "Kopieren",
@@ -30,8 +30,8 @@ const PB = (() => {
       patches: "Patches", open: "Open", openN: "open", collapse: "Collapse patches", expand: "Expand patches", done: "Done", working: "Claude is on it",
       placeholder: "What should change?", general: "General", browse: "Browse", comment: "Comment",
       emptyOpen: "No patches yet. Tap Comment, then tap a spot.", tapSpot: "Tap a spot",
-      emptyOpenTime: "No patches yet. Just type above, the timestamp is added for you.",
-      emptyDone: "Nothing done yet.", otherPages: "+{n} on other pages", otherImages: "+{n} on other images", thisPageOnly: "This page only", thisImageOnly: "This image only",
+      emptyOpenTime: "No patches yet. Just start typing, the timestamp is added for you.", close: "Close", mediaFail: "The file could not be loaded",
+      emptyDone: "Nothing done yet.", allDone: "All done.", otherPages: "+{n} on other pages", otherImages: "+{n} on other images", thisPageOnly: "This page only", thisImageOnly: "This image only",
       attach: "Attach screenshot", drop: "Drop screenshot here", local: "Patches stay in this browser.",
       readonly: "Read only. Commenting needs edit access.",
       handoff: "Done? Say:", handoffText: "Work through the patches", handoffLocal: "Done? Copy and paste into the chat:", copyPatches: "Copy patches", shotNote: "attach the screenshot in the chat", copied: "Copied", copy: "Copy",
@@ -56,6 +56,7 @@ const PB = (() => {
     pinMini: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3a8 8 0 0 1 0 16H4v-8a8 8 0 0 1 8-8z"/></svg>',
     dot: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="6"/></svg>',
     panel: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M15 4v16"/></svg>',
+    list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 7h11M9 12h11M9 17h11"/><circle cx="4.5" cy="7" r="1" fill="currentColor"/><circle cx="4.5" cy="12" r="1" fill="currentColor"/><circle cx="4.5" cy="17" r="1" fill="currentColor"/></svg>',
     chev: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg>',
     x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
     trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>',
@@ -113,6 +114,15 @@ const PB = (() => {
   const visible = () => S.patches.filter((p) => inTab(p, S.filter) && inScope(p));
   const blobUrl = (id) => (String(id).startsWith("data:") ? id : localBlobs.get(id) || "/_blob/" + id);
   function changed() { renderList(); O.onChange && O.onChange(); saveLocal(); }
+  // Theme colours for canvas drawing, read once and refreshed only when the theme changes.
+  let PAL = null;
+  function pal() {
+    if (PAL) return PAL;
+    const cs = getComputedStyle(document.documentElement), v = (n) => cs.getPropertyValue(n).trim();
+    return (PAL = { ink: v("--ink"), muted: v("--muted"), faint: v("--faint"), line: v("--line"), lineS: v("--line-strong"), acc: v("--accent"), accSoft: v("--accent-soft"),
+      panel: v("--panel"), work: v("--work"), ok: v("--ok"), donePin: v("--done-pin"), onAcc: v("--on-accent"), font: v("--font"), mono: v("--mono") });
+  }
+  function retheme() { PAL = null; O.onChange && O.onChange(); }
 
   // ---------- connect ----------
   async function connect() {
@@ -183,11 +193,16 @@ const PB = (() => {
       anchor: anchor || null, label: label || t("general"), shots: shots.map((s) => s.id),
       created: Date.now(), author: S.me || null,
     };
+    const keep = { ...S.draft };
     ui.ta.value = ""; autosize();
     clearDraft(true); updateSend();
     if (col) {
-      try { const ref = await col.add(doc); S.sel = ref.id; }
-      catch (e) { ui.ta.value = text; toast(t("saveFail") + (e && e.code ? " (" + e.code + ")" : "")); if (e && e.code === "invalid_argument") { S.readonly = true; renderFoot(); } }
+      try { const ref = await col.add(doc); S.sel = ref.id; changed(); }
+      catch (e) {
+        // nothing is lost: text, place and screenshots come back
+        if (!ui.ta.value) { ui.ta.value = text; autosize(); Object.assign(S.draft, keep); renderDraft(); O.onChange && O.onChange(); }
+        toast(t("saveFail") + (e && e.code ? " (" + e.code + ")" : "")); if (e && e.code === "invalid_argument") { S.readonly = true; renderFoot(); }
+      }
     } else { const id = "local-" + n; S.patches.push({ id, ...doc }); S.sel = id; changed(); }
   }
   async function patchUpdate(p, fields) {
@@ -274,15 +289,21 @@ const PB = (() => {
     if (withShots) S.draft.shots = [];
     renderDraft(); O.onChange && O.onChange();
   }
-  function renderDraft() {
+  let ctxState = null;
+  function renderCtx() {
     let label = S.draft.label, general = !S.draft.anchor;
     if (!S.draft.anchor && !S.draft.general && O.defaultAnchor) { const d = O.defaultAnchor(); if (d) { label = d.label; general = false; } }
-    ui.ctx.classList.toggle("general", general);
-    ui.ctxIcon.innerHTML = general ? I.dot : I.pinMini;
-    ui.ctxText.textContent = general ? t("general") : label;
-    ui.ctxText.title = general ? "" : label;
-    ui.ctxX.hidden = general;
-    ui.ctx.hidden = general;
+    if (ctxState !== general) {
+      ctxState = general;
+      ui.ctx.classList.toggle("general", general);
+      ui.ctxIcon.innerHTML = general ? I.dot : I.pinMini;
+      ui.ctxX.hidden = general; ui.ctx.hidden = general;
+    }
+    const text = general ? t("general") : label;
+    if (ui.ctxText.textContent !== text) { ui.ctxText.textContent = text; ui.ctxText.title = general ? "" : label; }
+  }
+  function renderDraft() {
+    renderCtx();
     const row = ui.dshots; row.textContent = "";
     for (const s of S.draft.shots) {
       row.append(h("span", { class: "pb-dshot" + (s.pending ? " pending" : "") },
@@ -293,7 +314,7 @@ const PB = (() => {
     updateSend();
   }
   function updateSend() { if (ui.send) ui.send.disabled = S.readonly || !(ui.ta.value.trim() || S.draft.shots.some((x) => !x.pending)); }
-  const refreshChip = () => ui.ctx && renderDraft();
+  const refreshChip = () => ui.ctx && renderCtx();
 
   // ---------- sidebar ----------
   function mount() {
@@ -305,10 +326,8 @@ const PB = (() => {
         h("span", { text: t(f) }), h("span", { class: "pb-count pb-num", text: "0" }));
       ui.tabs[f] = b; seg.append(b);
     }
-    ui.sum = h("span", { class: "pb-sum pb-num" });
     ui.toggle = h("button", { class: "pb-ibtn pb-toggle", "aria-label": t("collapse"), title: t("collapse"), onclick: (e) => { e.stopPropagation(); setCollapsed(!S.collapsed); } });
-    const head = h("header", { class: "pb-head" }, h("div", { class: "pb-title" }, t("patches"), ui.sum), seg, ui.toggle);
-    head.addEventListener("click", (e) => { if (O.layout !== "below" && mobile() && !e.target.closest(".pb-seg")) setCollapsed(!S.collapsed); });
+    const head = h("header", { class: "pb-head" }, h("div", { class: "pb-title", text: t("patches") }), seg, ui.toggle);
     ui.railCount = h("span", { class: "pb-rail-count pb-num" });
     ui.rail = h("button", { class: "pb-rail", "aria-label": t("expand"), title: t("expand"), onclick: () => setCollapsed(false) },
       h("span", { class: "pb-ibtn", html: I.panel }), ui.railCount);
@@ -333,8 +352,13 @@ const PB = (() => {
     ui.copyBtn = copyBtn;
     ui.handoff = h("div", { class: "pb-handoff" }, ui.handoffLabel, ui.handoffCode, copyBtn, ui.copyAll);
     ui.note = h("div", { class: "pb-note", hidden: true });
-    side.append(ui.rail, head, ui.list, h("div", { class: "pb-foot" }, ui.compose, ui.handoff, ui.note));
-    document.getElementById("pb-app").append(side);
+    // The list never sits under the input: on desktop it is the panel above it, on phones it slides in from the right.
+    ui.openCount = h("span", { class: "pb-open-count pb-num", hidden: true });
+    ui.open = h("button", { class: "pb-open", id: "pb-open", "aria-label": t("expand"), title: t("patches"), html: I.list, onclick: () => setCollapsed(false) }, ui.openCount);
+    ui.drawer = h("div", { class: "pb-drawer" }, head, ui.list, ui.handoff);
+    ui.scrim = h("div", { class: "pb-scrim", onclick: () => setCollapsed(true) });
+    side.append(ui.rail, ui.drawer, h("div", { class: "pb-foot" }, h("div", { class: "pb-frow" }, ui.compose, ui.open), ui.note));
+    document.getElementById("pb-app").append(side, ui.scrim);
 
     ui.ta.addEventListener("input", () => { autosize(); updateSend(); O.onTyping && O.onTyping(); });
     ui.ta.addEventListener("focus", () => { O.onTyping && O.onTyping(); refreshChip(); });
@@ -343,25 +367,34 @@ const PB = (() => {
       else if (e.key === "Escape") { e.preventDefault(); if (S.draft.anchor) clearDraft(); ui.ta.blur(); }
     });
     dropTarget(ui.compose, (files) => attach(files), (on) => ui.compose.classList.toggle("drag", on));
+    // swipe the panel away to the right on phones
+    let sw = null;
+    ui.drawer.addEventListener("touchstart", (e) => { const p = e.touches[0]; sw = e.touches.length === 1 ? { x: p.clientX, y: p.clientY } : null; }, { passive: true });
+    ui.drawer.addEventListener("touchmove", (e) => {
+      if (!sw || !mobile()) return; const p = e.touches[0], dx = p.clientX - sw.x, dy = p.clientY - sw.y;
+      if (dx > 56 && Math.abs(dx) > Math.abs(dy) * 1.6) { sw = null; setCollapsed(true); }
+    }, { passive: true });
     renderTabs(); renderDraft(); renderFoot();
-    let stored = null; try { stored = localStorage.getItem("pb-collapsed-" + CFG.kind); } catch {}
-    if (O.layout === "below") { document.getElementById("pb-app").classList.add("below"); setCollapsed(false, true); return; }
-    setCollapsed(stored != null ? stored === "1" : mobile(), true);
+    const stored = () => { try { return localStorage.getItem("pb-collapsed-" + CFG.kind) === "1"; } catch { return false; } };
+    setCollapsed(mobile() ? true : stored(), true);
+    try { matchMedia("(max-width: 860px)").addEventListener("change", () => setCollapsed(mobile() ? true : stored(), true)); } catch {}
   }
   function mobile() { return matchMedia("(max-width: 860px)").matches; }
   function setCollapsed(v, silent) {
     S.collapsed = !!v;
     document.getElementById("pb-app").classList.toggle("collapsed", S.collapsed);
-    ui.toggle.innerHTML = mobile() ? I.chev : I.panel;
-    ui.toggle.classList.toggle("flip", mobile() && !S.collapsed);
-    ui.toggle.title = ui.toggle.ariaLabel = S.collapsed ? t("expand") : t("collapse");
-    if (!silent) try { localStorage.setItem("pb-collapsed-" + CFG.kind, S.collapsed ? "1" : "0"); } catch {}
+    ui.toggle.innerHTML = mobile() ? I.x : I.panel;
+    const lbl = mobile() ? t("close") : S.collapsed ? t("expand") : t("collapse");
+    ui.toggle.title = lbl; ui.toggle.setAttribute("aria-label", lbl);
+    ui.open.setAttribute("aria-expanded", String(!S.collapsed));
+    O.onPanel && O.onPanel(!S.collapsed, mobile());
+    if (!silent && !mobile()) try { localStorage.setItem("pb-collapsed-" + CFG.kind, S.collapsed ? "1" : "0"); } catch {}
     if (!S.collapsed && S.sel) setTimeout(() => { const el = ui.list.querySelector(`[data-id="${CSS.escape(S.sel)}"]`); el && el.scrollIntoView({ block: "nearest" }); }, 60);
   }
   function autosize() { ui.ta.style.height = "0px"; ui.ta.style.height = Math.max(20, Math.min(160, ui.ta.scrollHeight - 10)) + "px"; }
   function renderTabs() {
     const nOpen = S.patches.filter(isOpen).length;
-    if (ui.sum) { ui.sum.textContent = nOpen ? nOpen + " " + t("openN") : ""; ui.railCount.textContent = nOpen ? String(nOpen) : ""; ui.railCount.hidden = !nOpen; }
+    for (const el of [ui.railCount, ui.openCount]) { el.textContent = nOpen ? String(nOpen) : ""; el.hidden = !nOpen; }
     for (const f of ["open", "done"]) {
       ui.tabs[f].setAttribute("aria-pressed", String(S.filter === f));
       ui.tabs[f].querySelector(".pb-count").textContent = S.patches.filter((p) => inTab(p, f) && inScope(p)).length;
@@ -370,7 +403,8 @@ const PB = (() => {
   function renderFoot() {
     if (!ui.note) return;
     const msg = S.readonly ? t("readonly") : !S.live ? t("local") : "";
-    ui.note.hidden = !msg; ui.note.textContent = msg;
+    ui.note.hidden = !msg; ui.note.textContent = msg; ui.note.classList.toggle("ro", S.readonly);
+    if (ui.fab) ui.fab.hidden = S.readonly;
     ui.compose.hidden = S.readonly; ui.handoff.hidden = S.readonly;
     const local = !S.live;
     ui.handoffLabel.textContent = local ? t("handoffLocal") : t("handoff");
@@ -378,6 +412,7 @@ const PB = (() => {
   }
   function renderList() {
     if (!ui.list) return;
+    if (S.editing) { S.stale = true; renderTabs(); return; }
     renderTabs();
     const items = visible().sort((a, b) => S.filter === "open" ? (a.n || 0) - (b.n || 0) : (b.doneAt || b.created || 0) - (a.doneAt || a.created || 0));
     ui.list.textContent = "";
@@ -390,7 +425,7 @@ const PB = (() => {
     };
     if (!items.length) {
       ui.list.append(h("div", { class: "pb-empty" }, h("span", { html: S.filter === "open" ? I.comment : I.check }),
-        S.filter === "open" ? (O.timeBased ? t("emptyOpenTime") : t("emptyOpen")) : t("emptyDone")));
+        S.filter === "open" ? (S.patches.some((p) => !isOpen(p) && inScope(p)) ? t("allDone") : O.timeBased ? t("emptyOpenTime") : t("emptyOpen")) : t("emptyDone")));
       const l = scopeLink(); if (l) ui.list.append(l);
       return;
     }
@@ -406,8 +441,12 @@ const PB = (() => {
     meta.append(h("span", { class: "pb-where", text: p.label || t("general") }));
     const text = h("div", { class: "pb-text", text: p.text || "", title: S.readonly ? null : t("edit") });
     if (!S.readonly) text.addEventListener("dblclick", (e) => {
-      e.stopPropagation(); text.contentEditable = "true"; text.focus();
-      const end = () => { text.contentEditable = "false"; const v = text.textContent.trim(); if (v && v !== p.text) patchUpdate(p, { text: v }); else text.textContent = p.text; };
+      e.stopPropagation(); if (S.editing) return; S.editing = true; text.contentEditable = "true"; text.focus();
+      const end = () => {
+        text.contentEditable = "false"; S.editing = false;
+        const v = text.textContent.trim(); if (v && v !== p.text) patchUpdate(p, { text: v }); else text.textContent = p.text;
+        if (S.stale) { S.stale = false; renderList(); }
+      };
       text.addEventListener("blur", end, { once: true });
       text.addEventListener("keydown", (k) => { if (k.key === "Enter" && !k.shiftKey) { k.preventDefault(); text.blur(); } if (k.key === "Escape") { text.textContent = p.text; text.blur(); } });
     });
@@ -436,9 +475,10 @@ const PB = (() => {
     el.addEventListener("keydown", (e) => { if (e.key === "Enter" && e.target === el) select(p.id, true); });
     return el;
   }
-  function select(id, jump) {
+  // jump: go to the place of the patch. reveal: also show it in the panel.
+  function select(id, jump, reveal) {
     S.sel = id;
-    if (S.collapsed && !jump) setCollapsed(false, true);
+    if (S.collapsed && (!jump || reveal)) setCollapsed(false, true);
     const p = S.patches.find((x) => x.id === id);
     if (p) {
       const want = isOpen(p) ? "open" : "done";
@@ -448,7 +488,9 @@ const PB = (() => {
     const el = ui.list.querySelector(`[data-id="${CSS.escape(id)}"]`);
     if (el) el.scrollIntoView({ block: "nearest", behavior: "smooth" });
     if (jump && p && O.focus) O.focus(p);
+    if (jump && !reveal && mobile() && !S.collapsed) setCollapsed(true, true); // on phones the panel gets out of the way
   }
+  function focusComposer() { if (S.collapsed && !mobile()) setCollapsed(false, true); if (ui.ta) ui.ta.focus({ preventScroll: true }); }
 
   // ---------- helpers ----------
   let toastTimer;
@@ -457,8 +499,9 @@ const PB = (() => {
     el.textContent = msg; el.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => (el.hidden = true), ms || 2200);
   }
   function lightbox(src) {
-    const lb = h("div", { class: "pb-lightbox", onclick: () => lb.remove() }, h("img", { src, alt: "" }));
-    const esc = (e) => { if (e.key === "Escape") { lb.remove(); document.removeEventListener("keydown", esc, true); } };
+    const close = () => { lb.remove(); document.removeEventListener("keydown", esc, true); };
+    const esc = (e) => { if (e.key === "Escape") { e.stopPropagation(); close(); } };
+    const lb = h("div", { class: "pb-lightbox", onclick: close }, h("img", { src, alt: "" }));
     document.addEventListener("keydown", esc, true); document.body.append(lb);
   }
   function copy(text) {
@@ -536,8 +579,11 @@ const PB = (() => {
       if (O.onKey && O.onKey(e)) { e.preventDefault(); return; }
       if (O.modes && (e.key === "c" || e.key === "C")) { e.preventDefault(); setMode(S.mode === "comment" ? "browse" : "comment"); }
       else if (O.modes && (e.key === "v" || e.key === "V")) { e.preventDefault(); setMode("browse"); }
+      else if (e.key === "Escape" && mobile() && !S.collapsed) { setCollapsed(true); }
       else if (e.key === "Escape" && S.draft.anchor) { clearDraft(); }
     });
+    new MutationObserver(retheme).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme", "class"] });
+    try { matchMedia("(prefers-color-scheme: dark)").addEventListener("change", retheme); } catch {}
     if (CFG.version) document.querySelectorAll("[data-pb-version]").forEach((el) => (el.textContent = CFG.version));
     connect();
   }
@@ -554,6 +600,7 @@ const PB = (() => {
       h("button", { class: "pb-ibtn", "aria-label": t("zoomIn"), html: I.plus, onclick: () => zoomCenter(1.25) }));
     zoomOut.addEventListener("click", fit);
     inner.append(img, layer); host.append(inner, zoomBox);
+    zoomBox.addEventListener("pointerdown", (e) => e.stopPropagation()); // zoom buttons never place a pin
     let z = 1, tx = 0, ty = 0, W = 0, H = 0, fitted = false, space = false;
 
     function apply() { inner.style.transform = `translate(${tx}px,${ty}px) scale(${z})`; layer.style.setProperty("--iz", 1 / z); zoomOut.textContent = Math.round(z * 100) + "%"; }
@@ -601,25 +648,47 @@ const PB = (() => {
       const d = opts.draft && opts.draft();
       if (d) add(d, 0, "draft", false, null);
     }
-    let drag = null;
+    let drag = null, pinch = null, rAF = 0;
+    const pts = new Map();
+    // pan and pinch can fire far more often than the screen refreshes: one transform per frame
+    const applySoon = () => { if (!rAF) rAF = requestAnimationFrame(() => { rAF = 0; apply(); }); };
+    const two = () => { const [a, b] = [...pts.values()]; const r = host.getBoundingClientRect(); return { d: Math.hypot(a.x - b.x, a.y - b.y) || 1, cx: (a.x + b.x) / 2 - r.left, cy: (a.y + b.y) / 2 - r.top }; };
     host.addEventListener("pointerdown", (e) => {
       if (e.button > 1 || !W) return;
-      host.setPointerCapture(e.pointerId);
+      try { host.setPointerCapture(e.pointerId); } catch {}
+      pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (pts.size === 2) {
+        // second finger: zoom and move with two fingers, whatever the mode; an unfinished area is dropped
+        if (drag && drag.rect) { S.draft.anchor = null; draw(); }
+        drag = null; host.classList.remove("panning");
+        const g = two(); pinch = { d: g.d, cx: g.cx, cy: g.cy, z, tx, ty };
+        return;
+      }
+      if (pts.size > 2 || pinch) return;
       const pan = opts.mode() !== "comment" || space || e.button === 1;
-      drag = { pan, x: e.clientX, y: e.clientY, tx, ty, c0: coord(e), moved: false };
+      drag = { id: e.pointerId, pan, x: e.clientX, y: e.clientY, tx, ty, c0: coord(e), moved: false };
       if (pan) host.classList.add("panning");
     });
     host.addEventListener("pointermove", (e) => {
-      if (!drag) return;
+      if (pts.has(e.pointerId)) pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (pinch && pts.size >= 2) {
+        const g = two(), nz = clamp(pinch.z * (g.d / pinch.d), 0.05, 10);
+        tx = g.cx - (pinch.cx - pinch.tx) * (nz / pinch.z); ty = g.cy - (pinch.cy - pinch.ty) * (nz / pinch.z); z = nz; fitted = false; applySoon();
+        return;
+      }
+      if (!drag || e.pointerId !== drag.id) return;
       const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
       if (Math.hypot(dx, dy) > 5) drag.moved = true;
-      if (drag.pan) { tx = drag.tx + dx; ty = drag.ty + dy; fitted = false; apply(); }
+      if (drag.pan) { tx = drag.tx + dx; ty = drag.ty + dy; fitted = false; applySoon(); }
       else if (drag.moved) { const c = coord(e); drag.rect = { x: Math.min(c.x, drag.c0.x), y: Math.min(c.y, drag.c0.y), w: Math.abs(c.x - drag.c0.x), h: Math.abs(c.y - drag.c0.y) }; opts.onDraft(drag.rect, true); }
     });
-    const end = () => {
-      if (!drag) return; host.classList.remove("panning");
-      if (!drag.pan) { if (drag.rect && drag.rect.w > 0.004 && drag.rect.h > 0.004) opts.onDraft(drag.rect, false); else if (!drag.moved) opts.onDraft(drag.c0, false); }
-      drag = null;
+    const end = (e) => {
+      pts.delete(e.pointerId);
+      if (pinch) { if (pts.size === 0) pinch = null; return; } // lifting the fingers after a pinch places nothing
+      if (!drag || e.pointerId !== drag.id) return; host.classList.remove("panning");
+      const d = drag; drag = null;
+      if (e.type !== "pointerup") { if (d.rect) { S.draft.anchor = null; draw(); } return; }
+      if (!d.pan) { if (d.rect && d.rect.w > 0.004 && d.rect.h > 0.004) opts.onDraft(d.rect, false); else if (!d.moved) opts.onDraft(d.c0, false); else if (d.rect) { S.draft.anchor = null; draw(); } }
     };
     host.addEventListener("pointerup", end); host.addEventListener("pointercancel", end);
     host.addEventListener("wheel", (e) => {
@@ -630,6 +699,7 @@ const PB = (() => {
     }, { passive: false });
     window.addEventListener("keydown", (e) => { if (e.code === "Space" && !keyTarget(e)) { space = true; } });
     window.addEventListener("keyup", (e) => { if (e.code === "Space") space = false; });
+    window.addEventListener("blur", () => { space = false; });
     new ResizeObserver(() => { if (fitted) fit(); }).observe(host);
     const setMode = (m) => { host.classList.toggle("comment", m === "comment"); host.classList.toggle("browse", m !== "comment"); };
     setMode(opts.mode());
@@ -637,18 +707,24 @@ const PB = (() => {
   }
 
   // ---------- timeline (scene bar, waveform, dots, press-and-hold zoom, drag = range) ----------
+  // Two layers: a canvas that is redrawn only when something changes (view, patches, theme),
+  // and a playhead element moved with a transform, so playback costs no canvas work at all.
   function Timeline(host, opts) {
     host.classList.add("tl");
-    const cv = h("canvas"); const tip = h("div", { class: "tl-tip", hidden: true });
-    host.append(cv, tip);
-    const ctx = cv.getContext("2d");
-    let v0 = 0, v1 = 0, target = null, hover = null, range = null, pd = null, raf = 0;
+    const cv = h("canvas"), cvp = h("canvas"), ph = h("div", { class: "tl-ph", hidden: true }), tip = h("div", { class: "tl-tip", hidden: true });
+    host.append(cv, cvp, ph, tip);
+    const ctx = cv.getContext("2d"), ctxp = cvp.getContext("2d");
+    let v0 = 0, v1 = 0, target = null, range = null, pd = null, raf = 0, lastPx = null, wave = false, R = { width: 0, height: 0 };
     const DOT = 20, BAR_Y = 28, PAD = 10;
     const dur = () => opts.duration() || 0;
-    function css(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
-    function size() { const r = host.getBoundingClientRect(); const d = devicePixelRatio || 1; cv.width = Math.round(r.width * d); cv.height = Math.round(r.height * d); ctx.setTransform(d, 0, 0, d, 0, 0); return r; }
-    let R = size();
-    new ResizeObserver(() => { R = size(); draw(); }).observe(host);
+    function size() {
+      const r = host.getBoundingClientRect(), d = Math.min(3, devicePixelRatio || 1);
+      for (const c of [cv, cvp]) { c.width = Math.round(r.width * d); c.height = Math.round(r.height * d); }
+      ctx.setTransform(d, 0, 0, d, 0, 0); ctxp.setTransform(d, 0, 0, d, 0, 0);
+      R = { width: r.width, height: r.height };
+    }
+    size();
+    new ResizeObserver(() => { size(); draw(); }).observe(host);
     const IW = () => Math.max(1, R.width - PAD * 2);
     const tToX = (tt) => PAD + ((tt - v0) / Math.max(1e-6, v1 - v0)) * IW();
     const xToT = (x) => clamp(v0 + ((x - PAD) / IW()) * (v1 - v0), 0, dur());
@@ -658,128 +734,137 @@ const PB = (() => {
       cancelAnimationFrame(raf);
       const step = () => {
         if (!target) return;
-        v0 += (target[0] - v0) * 0.28; v1 += (target[1] - v1) * 0.28;
+        v0 += (target[0] - v0) * 0.3; v1 += (target[1] - v1) * 0.3;
         if (Math.abs(target[0] - v0) + Math.abs(target[1] - v1) < 0.002) { v0 = target[0]; v1 = target[1]; target = null; }
         draw(); if (target) raf = requestAnimationFrame(step);
       };
       raf = requestAnimationFrame(step);
     }
-    function setView(a, b, now) { if (now) { v0 = a; v1 = b; target = null; draw(); } else { target = [a, b]; animate(); } }
+    function setView(a, b, now) { if (now) { cancelAnimationFrame(raf); v0 = a; v1 = b; target = null; draw(); } else { target = [a, b]; animate(); } }
     function reset(now) { setView(0, dur(), now); }
+    const zoomed = () => !!target || (dur() && v1 - v0 < dur() * 0.99);
+    function roundRect(c, x, y, w, hh, r) { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + hh, r); c.arcTo(x + w, y + hh, x, y + hh, r); c.arcTo(x, y + hh, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
     function draw() {
-      const W = R.width, Hh = R.height, D = dur();
-      ctx.clearRect(0, 0, W, Hh);
-      if (!D) return;
+      const W = R.width, Hh = R.height, D = dur(), P = pal();
+      ctx.clearRect(0, 0, W, Hh); ctxp.clearRect(0, 0, W, Hh);
+      lastPx = null;
+      if (!D || !W) { ph.hidden = true; return; }
       if (v1 <= v0) { v0 = 0; v1 = D; }
-      const ink = css("--ink"), muted = css("--muted"), line = css("--line"), lineS = css("--line-strong"), acc = css("--accent"), accSoft = css("--accent-soft"), panel = css("--panel"), work = css("--work"), donePin = css("--done-pin");
-      const barH = Hh - BAR_Y - 4;
-      // chapters
+      const barH = Hh - BAR_Y - 4, pins = opts.pins();
       const ch = opts.chapters ? opts.chapters() : [];
-      ctx.save(); roundRect(PAD, BAR_Y, W - PAD * 2, barH, 7); ctx.clip();
-      ctx.fillStyle = line; ctx.fillRect(PAD, BAR_Y, W - PAD * 2, barH);
+      ctx.save(); roundRect(ctx, PAD, BAR_Y, W - PAD * 2, barH, 10); ctx.clip();
+      ctx.fillStyle = P.line; ctx.fillRect(PAD, BAR_Y, W - PAD * 2, barH);
+      ctx.font = "11px " + P.font;
       ch.forEach(([name, s], i) => {
         const e = i + 1 < ch.length ? ch[i + 1][1] : D;
         const x0 = tToX(s), x1 = tToX(e);
         if (x1 < 0 || x0 > W) return;
-        if (i % 2) { ctx.fillStyle = line; ctx.fillRect(x0, BAR_Y, x1 - x0, barH); }
-        ctx.fillStyle = lineS; ctx.fillRect(x0, BAR_Y, 1, barH);
-        if (x1 - x0 > 46) { ctx.fillStyle = muted; ctx.font = "11px " + css("--font"); ctx.save(); ctx.beginPath(); ctx.rect(x0 + 6, BAR_Y, x1 - x0 - 12, barH); ctx.clip(); ctx.fillText(name, Math.max(x0, 0) + 7, BAR_Y + 15); ctx.restore(); }
+        if (i % 2) { ctx.fillStyle = P.line; ctx.fillRect(x0, BAR_Y, x1 - x0, barH); }
+        ctx.fillStyle = P.lineS; ctx.fillRect(x0, BAR_Y, 1, barH);
+        if (x1 - x0 > 46) { ctx.fillStyle = P.muted; ctx.save(); ctx.beginPath(); ctx.rect(x0 + 6, BAR_Y, x1 - x0 - 12, barH); ctx.clip(); ctx.fillText(name, Math.max(x0, PAD) + 7, BAR_Y + 15); ctx.restore(); }
       });
-      // waveform
+      // waveform: muted on the base layer, accent on the played layer (clipped at the playhead in pos())
       const peaks = opts.peaks && opts.peaks();
-      if (peaks && peaks.length) {
+      wave = !!(peaks && peaks.length);
+      if (wave) {
         const mid = BAR_Y + barH / 2 + (ch.length ? 6 : 0), amp = (barH / 2 - (ch.length ? 10 : 4));
-        const played = opts.time();
+        ctxp.save(); roundRect(ctxp, PAD, BAR_Y, W - PAD * 2, barH, 10); ctxp.clip();
+        ctx.fillStyle = P.muted; ctx.globalAlpha = 0.55; ctxp.fillStyle = P.acc; ctxp.globalAlpha = 0.9;
         for (let x = PAD; x < W - PAD; x += 2) {
           const tt = xToT(x), i = Math.floor((tt / D) * peaks.length), pk = peaks[clamp(i, 0, peaks.length - 1)] || 0;
           const hh = Math.max(1, pk * amp);
-          ctx.fillStyle = tt <= played ? acc : muted; ctx.globalAlpha = tt <= played ? 0.85 : 0.55;
-          ctx.fillRect(x, mid - hh, 1.4, hh * 2);
+          ctx.fillRect(x, mid - hh, 1.4, hh * 2); ctxp.fillRect(x, mid - hh, 1.4, hh * 2);
         }
-        ctx.globalAlpha = 1;
+        ctx.globalAlpha = 1; ctxp.restore();
       }
-      // ranges of patches
-      for (const p of opts.pins()) {
+      for (const p of pins) {
         const a = p.anchor || {}; if (a.t2 == null) continue;
-        ctx.fillStyle = p.status === "done" ? line : accSoft; ctx.fillRect(tToX(a.t), BAR_Y, tToX(a.t2) - tToX(a.t), barH);
+        ctx.fillStyle = p.status === "done" ? P.line : P.accSoft; ctx.fillRect(tToX(a.t), BAR_Y, tToX(a.t2) - tToX(a.t), barH);
       }
-      if (range) { ctx.fillStyle = accSoft; ctx.fillRect(tToX(range[0]), BAR_Y, tToX(range[1]) - tToX(range[0]), barH); ctx.fillStyle = acc; ctx.fillRect(tToX(range[0]), BAR_Y, 1.5, barH); ctx.fillRect(tToX(range[1]) - 1.5, BAR_Y, 1.5, barH); }
+      const dr = opts.draft && opts.draft();
+      const rg = range || (dr && dr.t2 != null ? [dr.t, dr.t2] : null);
+      if (rg) { ctx.fillStyle = P.accSoft; ctx.fillRect(tToX(rg[0]), BAR_Y, tToX(rg[1]) - tToX(rg[0]), barH); ctx.fillStyle = P.acc; ctx.fillRect(tToX(rg[0]), BAR_Y, 1.5, barH); ctx.fillRect(tToX(rg[1]) - 1.5, BAR_Y, 1.5, barH); }
       ctx.restore();
-      // zoom ticks
       if (v1 - v0 < D * 0.99) {
         const span = v1 - v0, step = [0.1, 0.25, 0.5, 1, 2, 5, 10, 30, 60].find((s) => span / s < 14) || 120;
-        ctx.fillStyle = muted; ctx.font = "10px " + css("--mono");
-        for (let s = Math.ceil(v0 / step) * step; s <= v1; s += step) { const x = tToX(s); ctx.fillRect(x, Hh - 8, 1, 6); }
+        ctx.fillStyle = P.muted;
+        for (let s = Math.ceil(v0 / step) * step; s <= v1; s += step) ctx.fillRect(tToX(s), Hh - 8, 1, 6);
       }
-      // playhead
-      const px = tToX(opts.time());
-      ctx.fillStyle = ink; ctx.fillRect(px - 1, BAR_Y - 4, 2, barH + 8);
-      ctx.beginPath(); ctx.arc(px, BAR_Y - 4, 4, 0, Math.PI * 2); ctx.fill();
-      // dots
       const sel = S.sel;
-      for (const p of opts.pins()) {
+      ctx.font = "600 9.5px " + P.font; ctx.textAlign = "center";
+      for (const p of pins) {
         const a = p.anchor || {}; if (a.t == null) continue;
         const x = tToX(a.t); if (x < -10 || x > W + 10) continue;
-        ctx.fillStyle = p.status === "done" ? donePin : p.status === "working" ? work : acc;
+        ctx.fillStyle = p.status === "done" ? P.ok : p.status === "working" ? P.work : P.acc;
         ctx.beginPath(); ctx.arc(x, 10, p.id === sel ? 9.5 : 8, 0, Math.PI * 2); ctx.fill();
-        if (p.id === sel) { ctx.strokeStyle = panel; ctx.lineWidth = 2; ctx.stroke(); }
-        ctx.fillStyle = css("--on-accent"); ctx.font = "600 9.5px " + css("--font"); ctx.textAlign = "center"; ctx.fillText(String(p.n || ""), x, 13.5); ctx.textAlign = "start";
+        if (p.id === sel) { ctx.strokeStyle = P.panel; ctx.lineWidth = 2; ctx.stroke(); }
+        ctx.fillStyle = p.status === "done" ? "#fff" : P.onAcc; ctx.fillText(p.status === "done" ? "✓" : String(p.n || ""), x, 13.5);
       }
-      const d = opts.draft && opts.draft();
-      if (d && d.t != null) { const x = tToX(d.t); ctx.strokeStyle = acc; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x, 10, 6, 0, Math.PI * 2); ctx.stroke(); }
-      if (hover != null && !pd) { tip.hidden = false; tip.style.left = clamp(hover, 24, W - 24) + "px"; tip.textContent = fmtTime(xToT(hover), v1 - v0 < 30); }
-      else if (!pd || pd.mode === "pending") tip.hidden = true;
+      ctx.textAlign = "start";
+      if (dr && dr.t != null) { const x = tToX(dr.t); ctx.strokeStyle = P.acc; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x, 10, 6, 0, Math.PI * 2); ctx.stroke(); }
+      pos();
     }
-    function roundRect(x, y, w, hh, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + hh, r); ctx.arcTo(x + w, y + hh, x, y + hh, r); ctx.arcTo(x, y + hh, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+    // Move the playhead. Called on every frame during playback: one transform, no canvas work, no layout reads.
+    function pos() {
+      const D = dur(); if (!D || !R.width) return;
+      const x = tToX(opts.time()), px = Math.round(x * 4) / 4;
+      if (px === lastPx) return; lastPx = px;
+      const out = px < PAD - 2 || px > R.width - PAD + 2;
+      if (ph.hidden !== out) ph.hidden = out;
+      ph.style.transform = "translate3d(" + px + "px,0,0)";
+      if (wave) cvp.style.clipPath = "inset(0 " + Math.max(0, R.width - px) + "px 0 0)";
+    }
     function hitDot(x, y) {
       if (y > DOT + 4) return null;
-      let best = null, bd = 10;
+      let best = null, bd = 12;
       for (const p of opts.pins()) { const a = p.anchor || {}; if (a.t == null) continue; const d = Math.abs(tToX(a.t) - x); if (d < bd) { bd = d; best = p; } }
       return best;
     }
-    const lx = (e) => e.clientX - host.getBoundingClientRect().left;
-    const ly = (e) => e.clientY - host.getBoundingClientRect().top;
+    const showTip = (x, tt, dec) => { tip.hidden = false; tip.style.left = clamp(x, 26, R.width - 26) + "px"; tip.textContent = fmtTime(tt, dec); };
+    let box = null;
+    const lx = (e) => e.clientX - box.left, ly = (e) => e.clientY - box.top;
     host.addEventListener("pointerdown", (e) => {
-      if (!dur() || e.button > 0) return;
+      if (!dur() || e.button > 0 || pd) return;
+      box = host.getBoundingClientRect();
       const x = lx(e), dot = hitDot(x, ly(e));
-      if (dot) { select(dot.id, true); return; }
-      host.setPointerCapture(e.pointerId);
+      if (dot) { select(dot.id, true, true); return; }
+      try { host.setPointerCapture(e.pointerId); } catch {}
       const t0 = xToT(x);
-      pd = { x, y: ly(e), t0, touch: e.pointerType !== "mouse", mode: "pending", timer: setTimeout(() => {
+      pd = { id: e.pointerId, x, t0, touch: e.pointerType !== "mouse", mode: "pending", timer: setTimeout(() => {
         if (!pd || pd.mode !== "pending") return;
         pd.mode = "zoom";
-        const span = Math.max(Math.min(dur(), 4), dur() * 0.08), c = t0;
-        const a = clamp(c - span * ((x - PAD) / IW()), 0, Math.max(0, dur() - span));
-        host.classList.add("tl-big"); setView(a, a + span); opts.seek(t0); opts.onScrubStart && opts.onScrubStart();
+        const span = Math.max(Math.min(dur(), 4), dur() * 0.08);
+        const a = clamp(t0 - span * ((x - PAD) / IW()), 0, Math.max(0, dur() - span));
+        host.classList.add("tl-big"); setView(a, a + span); opts.onScrubStart && opts.onScrubStart(); opts.seek(t0); showTip(x, t0, true);
       }, 320) };
     });
     host.addEventListener("pointermove", (e) => {
-      const x = lx(e); hover = x;
-      if (pd) {
-        // a tap that wobbles a few pixels stays a tap; touch needs a clearer drag to start a range
-        if (pd.mode === "pending" && Math.abs(x - pd.x) > (pd.touch ? 16 : 6) && opts.onRange) { clearTimeout(pd.timer); pd.mode = "range"; }
-        if (pd.mode === "zoom") { const tt = xToTT(x); opts.seek(tt); tip.hidden = false; tip.style.left = clamp(x, 24, R.width - 24) + "px"; tip.textContent = fmtTime(tt, true); }
-        if (pd.mode === "range") { const t1 = xToT(x); range = [Math.min(pd.t0, t1), Math.max(pd.t0, t1)]; }
+      if (!pd) { if (e.pointerType === "mouse" && dur()) { box = host.getBoundingClientRect(); const x = lx(e); showTip(x, xToT(x), v1 - v0 < 30); } return; }
+      if (e.pointerId !== pd.id) return;
+      const x = lx(e);
+      // a tap that wobbles a few pixels stays a tap; touch needs a clearer drag to start a range
+      if (pd.mode === "pending" && Math.abs(x - pd.x) > (pd.touch ? 16 : 6) && opts.onRange) { clearTimeout(pd.timer); pd.mode = "range"; }
+      if (pd.mode === "zoom") { const tt = xToTT(x); opts.seek(tt); showTip(x, tt, true); }
+      else if (pd.mode === "range") { const t1 = xToT(x); range = [Math.min(pd.t0, t1), Math.max(pd.t0, t1)]; showTip(x, t1, true); draw(); }
+    });
+    host.addEventListener("pointerleave", () => { if (!pd) tip.hidden = true; });
+    const up = (e) => {
+      if (!pd || (e && e.pointerId !== pd.id)) return; clearTimeout(pd.timer);
+      const m = pd.mode, t0 = pd.t0, rg = range; pd = null; range = null; tip.hidden = true;
+      if (m === "pending") opts.seek(t0);
+      else if (m === "zoom") { host.classList.remove("tl-big"); reset(); opts.onScrubEnd && opts.onScrubEnd(); }
+      else if (m === "range" && rg) {
+        const min = Math.max(0.3, (v1 - v0) * 0.02);
+        if (rg[1] - rg[0] >= min) opts.onRange(rg[0], rg[1]); else opts.seek(t0);
       }
       draw();
-    });
-    host.addEventListener("pointerleave", () => { hover = null; draw(); });
-    const up = () => {
-      if (!pd) return; clearTimeout(pd.timer);
-      if (pd.mode === "pending") opts.seek(pd.t0);
-      else if (pd.mode === "zoom") { host.classList.remove("tl-big"); reset(); }
-      else if (pd.mode === "range" && range) {
-        const min = Math.max(0.3, (v1 - v0) * 0.02);
-        if (range[1] - range[0] >= min) opts.onRange(range[0], range[1]); else opts.seek(pd.t0);
-      }
-      range = null; pd = null; tip.hidden = true; draw();
     };
-    host.addEventListener("pointerup", up); host.addEventListener("pointercancel", up);
-    return { draw, reset };
+    host.addEventListener("pointerup", up); host.addEventListener("pointercancel", up); host.addEventListener("lostpointercapture", up);
+    return { draw, pos, reset, zoomed };
   }
 
   return {
-    boot, refresh: () => changed(), quote, setCollapsed, draggable, movePatch, canDrag, t, I, h, $, S, pin, blobUrl, fmtTime, clamp, toast, lightbox, setDraft, clearDraft, refreshChip, select, setMode,
+    boot, refresh: () => changed(), quote, setCollapsed, draggable, movePatch, canDrag, t, I, h, $, S, pin, blobUrl, fmtTime, clamp, toast, lightbox, setDraft, clearDraft, refreshChip, select, setMode, pal, focusComposer, mobile,
     modeToggle, visible, addBoard, attach, upload, keyTarget, handlePaste, ImageCanvas, Timeline, lang,
     get patches() { return S.patches; }, get boards() { return S.boards; },
   };

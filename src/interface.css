@@ -1,7 +1,7 @@
 /* interface surface */
 .if-area { position: relative; flex: 1; min-height: 0; overflow: hidden; }
 .if-frame { position: absolute; transform-origin: 0 0; background: #fff; box-sizing: content-box; }
-.if-frame.fixed { border-radius: 8px; overflow: hidden; box-shadow: var(--shadow), 0 0 0 1px var(--line); }
+.if-frame.fixed { border-radius: 10px; overflow: hidden; box-shadow: var(--shadow), 0 0 0 1px var(--line); }
 .if-frame.device { border: 12px solid #0e0e0d; border-radius: 46px; overflow: hidden; box-shadow: 0 0 0 1px var(--line-strong), 0 20px 50px rgba(0, 0, 0, .22); }
 .if-iframe { width: 100%; height: 100%; border: 0; display: block; background: #fff; }
 .if-catch { position: absolute; inset: 0; cursor: crosshair; }
@@ -12,7 +12,8 @@
 @media (max-width: 1180px) { .pb-mlabel { display: none; } }
 @media (max-width: 560px) { .if-width, .if-reload { display: none; } .pb-bar { flex-wrap: nowrap; gap: 6px; } .pb-bar .pb-select { max-width: 104px; min-width: 0; } .pb-seg button { padding: 5px 7px; } }
 .if-edge {
-  position: absolute; transform: translateX(-50%); z-index: 12; height: 28px; padding: 0 12px; border-radius: 999px; border: 0;
-  background: var(--accent); color: var(--on-accent); font: 600 12px var(--font); cursor: pointer; box-shadow: 0 4px 14px rgba(0, 0, 0, .22);
+  position: absolute; transform: translateX(-50%); z-index: 12; height: 28px; padding: 0 12px; border-radius: 999px;
+  background: var(--glass-2); color: var(--ink); font: 600 12px var(--font); cursor: pointer; border: 1px solid var(--glass-edge);
+  -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur); box-shadow: var(--glass-hi), var(--glass-drop);
 }
 .if-edge.down { bottom: 64px; }

@@ -153,7 +153,9 @@
     root.append(style, hl, hlTag, pinsBox);
     fdoc.documentElement.appendChild(host);
     const ours = (e) => e.composedPath && e.composedPath().includes(host);
-    const block = (e) => { if (S.mode === "comment" && !ours(e)) { e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); } };
+    // Touch events are only hidden from the site, never cancelled: cancelling touchend would swallow the tap's click
+    // (no pin on phones) and cancelling touchstart would stop scrolling.
+    const block = (e) => { if (S.mode === "comment" && !ours(e)) { if (!/^touch/.test(e.type)) e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); } };
     for (const ev of ["mousedown", "mouseup", "pointerdown", "pointerup", "dblclick", "submit", "auxclick", "contextmenu", "touchstart", "touchend"]) fdoc.addEventListener(ev, block, true);
     fdoc.addEventListener("click", (e) => { if (S.mode !== "comment" || ours(e)) return; block(e); place(e); }, true);
     fdoc.addEventListener("mousemove", (e) => { if (S.mode === "comment" && !ours(e)) highlight(e.target); }, true);

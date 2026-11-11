@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.4.0
+
+- Patches are never under the input any more. On desktop they sit in a panel on the right that collapses to a rail; on phones only the input docks under the work and the patches slide in from the right (list button with the open count, swipe or tap outside to close). Audio and video use the same layout instead of a scrolling page.
+- Liquid glass design: translucent panels and bars, capsule controls, blurred glass for the Comment button, zoom control, drawer, toast and lightbox, in light and dark.
+- Video and audio play without stutter: during playback only the playhead moves, the timeline is no longer redrawn on every frame, colours are read once, and scrubbing applies only the newest seek. The skill now encodes review copies with a keyframe every second so jumping is instant.
+- Fixed: on phones a tap on a live website or app in comment mode placed no pin.
+- Fixed: the timeline time bubble could stay stuck after a touch; the zoom buttons on images could place a pin; a failed save lost the place and screenshots of the patch; an inline edit was thrown away when another change arrived; PDF pages could turn blank when zoomed in on phones; read-only viewers still saw the Comment button.
+- New: two-finger zoom on images and PDFs, green check for done patches on the timeline, "All done" instead of the empty hint when everything is closed.
+
 ## 1.3.4
 
 - Video and audio: playback starts and stops reliably (no CORS requirement on the source, one tap is one toggle, plays inline on iPhone).

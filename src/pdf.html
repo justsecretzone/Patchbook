@@ -2,7 +2,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>
 /*@core.css*/
-.pd-scroll { flex: 1; min-height: 0; overflow: auto; position: relative; }
+.pd-scroll { flex: 1; min-height: 0; overflow: auto; position: relative; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
 .pd-pages { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 8px 8px 32px; min-width: min-content; }
 .pd-page { position: relative; background: #fff; box-shadow: var(--shadow), 0 0 0 1px var(--line); border-radius: 2px; flex: none; }
 .pd-page canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
@@ -69,12 +69,26 @@ const CFG = {
     scroller.scrollTop = anchorY * scroller.scrollHeight - scroller.clientHeight / 2;
   }
   zoomOut.addEventListener("click", fit);
-  function size() {
+  function size(later) {
     const s = fitW * k;
-    for (const p of pages) { p.el.style.width = p.w * s + "px"; p.el.style.height = p.h * s + "px"; p.rendered = 0; }
+    for (const p of pages) { p.el.style.width = p.w * s + "px"; p.el.style.height = p.h * s + "px"; }
     zoomOut.textContent = Math.round(k * 100) + "%";
-    renderVisible();
+    if (!later) renderVisible();
   }
+  // two-finger zoom on phones: resize live, render sharp once the fingers lift
+  let pz = null;
+  const dist = (e) => Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY) || 1;
+  scroller.addEventListener("touchstart", (e) => { if (e.touches.length === 2 && pages.length) pz = { d: dist(e), k }; }, { passive: true });
+  scroller.addEventListener("touchmove", (e) => {
+    if (!pz || e.touches.length !== 2) return;
+    e.preventDefault();
+    const r = scroller.getBoundingClientRect(), cy = (e.touches[0].clientY + e.touches[1].clientY) / 2 - r.top, cx = (e.touches[0].clientX + e.touches[1].clientX) / 2 - r.left;
+    const ay = (scroller.scrollTop + cy) / scroller.scrollHeight, ax = (scroller.scrollLeft + cx) / scroller.scrollWidth;
+    k = clamp(pz.k * (dist(e) / pz.d), 0.3, 4); size(true);
+    scroller.scrollTop = ay * scroller.scrollHeight - cy; scroller.scrollLeft = ax * scroller.scrollWidth - cx;
+  }, { passive: false });
+  const pzEnd = () => { if (pz) { pz = null; renderVisible(); } };
+  scroller.addEventListener("touchend", pzEnd); scroller.addEventListener("touchcancel", pzEnd);
   let obs = null;
   const vis = new Set();
   function io() {
@@ -82,10 +96,13 @@ const CFG = {
     for (const p of pages) obs.observe(p.el);
   }
   async function renderVisible() {
-    const s = fitW * k, dpr = Math.min(2.5, devicePixelRatio || 1);
+    const s = fitW * k;
     for (const p of pages) {
       if (!vis.has(p.el) || p.rendered === s) continue;
       p.rendered = s;
+      // stay under the canvas size phones can allocate (about 16 million pixels), or the page turns blank when zoomed in
+      let dpr = Math.min(2.5, devicePixelRatio || 1);
+      const px = p.w * s * dpr * p.h * s * dpr; if (px > 12e6) dpr *= Math.sqrt(12e6 / px);
       const vp = p.page.getViewport({ scale: s * dpr });
       if (p.task) try { p.task.cancel(); } catch {}
       const c = document.createElement("canvas"); c.width = Math.floor(vp.width); c.height = Math.floor(vp.height);
@@ -118,13 +135,13 @@ const CFG = {
   }
   function wire(P) {
     let d = null;
-    P.el.addEventListener("pointerdown", (e) => { if (S.mode !== "comment" || e.button) return; e.preventDefault(); P.el.setPointerCapture(e.pointerId); d = { c0: frac(P, e), x: e.clientX, y: e.clientY, rect: null }; });
+    P.el.addEventListener("pointerdown", (e) => { if (S.mode !== "comment" || e.button || pz) return; e.preventDefault(); P.el.setPointerCapture(e.pointerId); d = { c0: frac(P, e), x: e.clientX, y: e.clientY, rect: null }; });
     P.el.addEventListener("pointermove", (e) => {
       if (!d) return;
       if (Math.hypot(e.clientX - d.x, e.clientY - d.y) > 5) { const c = frac(P, e); d.rect = { x: Math.min(c.x, d.c0.x), y: Math.min(c.y, d.c0.y), w: Math.abs(c.x - d.c0.x), h: Math.abs(c.y - d.c0.y) }; S.draft.anchor = mk(P, d.rect); draw(); }
     });
     const up = async () => {
-      if (!d) return;
+      if (!d || pz) { d = null; return; }
       const a = mk(P, d.rect && d.rect.w > 0.004 ? d.rect : d.c0); d = null;
       PB.setDraft(a, label(a));
       const q = await quoteFor(P, a);

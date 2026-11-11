@@ -1,16 +1,16 @@
 <title>App Review</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>
-/* Patchbook: stage on the left, patch sidebar on the right; stacks on phones. */
+/* Patchbook: the work fills the stage, patches live in a glass panel that opens from the side. */
 :root {
-  --bg: #f5f4ef;
+  --bg: #eceae3;
   --panel: #fdfcf9;
-  --stage: #ebe9e1;
+  --stage: #e9e7df;
   --ink: #1f1e1c;
   --muted: #74716a;
   --faint: #a8a59c;
-  --line: rgba(31, 30, 28, .1);
-  --line-strong: rgba(31, 30, 28, .18);
+  --line: rgba(31, 30, 28, .09);
+  --line-strong: rgba(31, 30, 28, .17);
   --accent: #1f1e1c;
   --accent-soft: rgba(31, 30, 28, .07);
   --on-accent: #ffffff;
@@ -21,96 +21,118 @@
   --ring: rgba(31, 30, 28, .32);
   --ring-soft: rgba(31, 30, 28, .06);
   --shadow: 0 1px 2px rgba(31, 30, 28, .06), 0 6px 20px rgba(31, 30, 28, .06);
+  /* liquid glass */
+  --glass: rgba(255, 255, 255, .56);
+  --glass-2: rgba(255, 255, 255, .78);
+  --glass-solid: rgba(250, 249, 245, .9);
+  --glass-edge: rgba(255, 255, 255, .9);
+  --glass-line: rgba(31, 30, 28, .08);
+  --glass-hi: inset 0 1px 0 rgba(255, 255, 255, .95), inset 0 -1px 0 rgba(31, 30, 28, .03);
+  --glass-drop: 0 10px 32px rgba(31, 30, 28, .13), 0 1px 3px rgba(31, 30, 28, .08);
+  --field: rgba(255, 255, 255, .72);
+  --amb-1: rgba(255, 255, 255, .85);
+  --amb-2: rgba(255, 255, 255, .5);
+  --scrim: rgba(31, 30, 28, .22);
+  --blur: blur(22px) saturate(180%);
   --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
   --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, ui-serif, serif;
   --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   --r: 14px;
+  --ease: cubic-bezier(.2, .8, .2, 1);
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #1c1b19; --panel: #262523; --stage: #151413; --ink: #f2f0ea; --muted: #a6a39b; --faint: #75726b;
+    --bg: #1a1918; --panel: #262523; --stage: #141312; --ink: #f2f0ea; --muted: #a6a39b; --faint: #75726b;
     --line: rgba(242, 240, 234, .09); --line-strong: rgba(242, 240, 234, .16);
     --accent: #ffffff; --accent-soft: rgba(255, 255, 255, .1); --on-accent: #1c1b19;
     --ok: #46c27a; --ok-soft: rgba(70, 194, 122, .15); --work: #a6a39b; --done-pin: #6f6c66; --ring: rgba(255, 255, 255, .3); --ring-soft: rgba(255, 255, 255, .05);
     --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px rgba(0, 0, 0, .25);
+    --glass: rgba(58, 57, 53, .5); --glass-2: rgba(66, 65, 61, .72); --glass-solid: rgba(38, 37, 35, .9);
+    --glass-edge: rgba(255, 255, 255, .1); --glass-line: rgba(255, 255, 255, .09);
+    --glass-hi: inset 0 1px 0 rgba(255, 255, 255, .14), inset 0 -1px 0 rgba(0, 0, 0, .2);
+    --glass-drop: 0 12px 36px rgba(0, 0, 0, .45), 0 1px 3px rgba(0, 0, 0, .3);
+    --field: rgba(255, 255, 255, .07); --amb-1: rgba(255, 255, 255, .06); --amb-2: rgba(255, 255, 255, .03); --scrim: rgba(0, 0, 0, .45);
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #1c1b19; --panel: #262523; --stage: #151413; --ink: #f2f0ea; --muted: #a6a39b; --faint: #75726b;
+  --bg: #1a1918; --panel: #262523; --stage: #141312; --ink: #f2f0ea; --muted: #a6a39b; --faint: #75726b;
   --line: rgba(242, 240, 234, .09); --line-strong: rgba(242, 240, 234, .16);
   --accent: #ffffff; --accent-soft: rgba(255, 255, 255, .1); --on-accent: #1c1b19;
   --ok: #46c27a; --ok-soft: rgba(70, 194, 122, .15); --work: #a6a39b; --done-pin: #6f6c66; --ring: rgba(255, 255, 255, .3); --ring-soft: rgba(255, 255, 255, .05);
   --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px rgba(0, 0, 0, .25);
+  --glass: rgba(58, 57, 53, .5); --glass-2: rgba(66, 65, 61, .72); --glass-solid: rgba(38, 37, 35, .9);
+  --glass-edge: rgba(255, 255, 255, .1); --glass-line: rgba(255, 255, 255, .09);
+  --glass-hi: inset 0 1px 0 rgba(255, 255, 255, .14), inset 0 -1px 0 rgba(0, 0, 0, .2);
+  --glass-drop: 0 12px 36px rgba(0, 0, 0, .45), 0 1px 3px rgba(0, 0, 0, .3);
+  --field: rgba(255, 255, 255, .07); --amb-1: rgba(255, 255, 255, .06); --amb-2: rgba(255, 255, 255, .03); --scrim: rgba(0, 0, 0, .45);
   color-scheme: dark;
 }
 
 [hidden] { display: none !important; }
-html, body { height: 100%; margin: 0; padding: 0; }
-body { background: var(--bg); color: var(--ink); font: 14px/1.45 var(--font); -webkit-font-smoothing: antialiased; }
-button { font: inherit; color: inherit; }
-:focus, :focus-visible { outline: none; }
+html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; }
+/* no page zoom: fields use 16px on touch (below), double-tap and pinch never scale the whole review */
+html, body { touch-action: pan-x pan-y; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body {
+  color: var(--ink); font: 14px/1.45 var(--font); -webkit-font-smoothing: antialiased;
+  background:
+    radial-gradient(120% 80% at 100% 0%, var(--amb-1), transparent 60%),
+    radial-gradient(90% 70% at 0% 100%, var(--amb-2), transparent 55%),
+    var(--bg);
+}
+button { font: inherit; color: inherit; -webkit-tap-highlight-color: transparent; }
+:focus { outline: none; }
+:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+textarea:focus-visible, [contenteditable]:focus-visible { outline: none; }
 
 #pb-app {
   height: 100%; box-sizing: border-box;
-  display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 0; transition: grid-template-columns .2s ease;
+  display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 0; transition: grid-template-columns .24s var(--ease);
   padding: 0 env(safe-area-inset-right, 0px) 0 env(safe-area-inset-left, 0px);
 }
 .pb-stage {
   position: relative; min-width: 0; min-height: 0; display: flex; flex-direction: column;
-  background: var(--stage); border-radius: 0; overflow: hidden;
+  background: var(--stage); overflow: hidden;
 }
 #pb-app.collapsed { grid-template-columns: minmax(0, 1fr) 52px; }
-@media (max-width: 860px) {
-  #pb-app, #pb-app.collapsed { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; gap: 0; }
-}
-/* phones: the work goes edge to edge, the patches panel docks to the bottom */
-@media (max-width: 860px) {
-  #pb-app:not(.below), #pb-app.collapsed:not(.below) { padding: 0 env(safe-area-inset-right, 0px) 0 env(safe-area-inset-left, 0px); gap: 0; }
-  #pb-app:not(.below) .pb-stage { border-radius: 0; }
-  #pb-app:not(.below) #pb-side { border-radius: 16px 16px 0 0; border-width: 1px 0 0; padding-bottom: max(4px, calc(env(safe-area-inset-bottom, 0px) - 14px)); }
-  #pb-app.collapsed:not(.below) .pb-head { padding-top: 6px; padding-bottom: 2px; }
-  #pb-app.collapsed:not(.below) .pb-foot { padding: 6px 10px 8px; }
-  #pb-app:not(.below) .pb-fab { bottom: 10px; }
-  #pb-app:not(.below) .pb-bar { padding: 4px 6px; gap: 6px; min-height: 0; }
-  #pb-app:not(.below) .pb-bar .pb-seg button { padding: 4px 7px; }
-}
-@media (prefers-reduced-motion: reduce) { #pb-app { transition: none; } }
+@media (prefers-reduced-motion: reduce) { #pb-app, .pb-drawer, .pb-scrim, .pb-fab, .tl { transition: none !important; } }
 
 /* ---------- toolbar ---------- */
 .pb-bar {
   display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-  padding: 8px 10px; border-bottom: 1px solid var(--line); background: var(--stage);
+  padding: 7px 10px; border-bottom: 1px solid var(--glass-line);
+  background: linear-gradient(180deg, var(--glass-2), var(--glass)); box-shadow: var(--glass-hi);
   position: relative; z-index: 3;
 }
 .pb-bar .pb-grow { flex: 1; }
-.pb-seg { display: inline-flex; padding: 2px; border-radius: 10px; background: var(--line); gap: 2px; }
+.pb-seg { display: inline-flex; padding: 2px; border-radius: 999px; background: var(--line); gap: 2px; box-shadow: inset 0 1px 2px rgba(0, 0, 0, .05); }
 .pb-seg button {
-  border: 0; background: transparent; padding: 5px 10px; border-radius: 8px; cursor: pointer;
+  border: 0; background: transparent; padding: 5px 11px; border-radius: 999px; cursor: pointer;
   display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 13px; white-space: nowrap;
+  transition: color .15s, background .2s var(--ease);
 }
-.pb-seg button[aria-pressed="true"] { background: var(--panel); color: var(--ink); box-shadow: var(--shadow); }
+.pb-seg button[aria-pressed="true"] { background: var(--glass-2); color: var(--ink); box-shadow: var(--glass-hi), 0 1px 4px rgba(0, 0, 0, .12); }
 .pb-seg button:hover { color: var(--ink); }
 .pb-seg svg { width: 15px; height: 15px; }
 .pb-btn {
-  border: 1px solid var(--line); background: var(--panel); border-radius: 9px; padding: 5px 9px;
+  border: 1px solid var(--glass-line); background: var(--field); border-radius: 999px; padding: 5px 11px; box-shadow: var(--glass-hi);
   display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-size: 13px; color: var(--ink);
 }
 .pb-btn:hover { border-color: var(--line-strong); }
 .pb-btn svg, .pb-ibtn svg { width: 16px; height: 16px; }
 .pb-ibtn {
-  border: 0; background: transparent; border-radius: 8px; width: 30px; height: 30px; padding: 0;
-  display: inline-grid; place-items: center; cursor: pointer; color: var(--muted);
+  border: 0; background: transparent; border-radius: 50%; width: 30px; height: 30px; padding: 0;
+  display: inline-grid; place-items: center; cursor: pointer; color: var(--muted); transition: background .15s, color .15s;
 }
 .pb-ibtn:hover { background: var(--line); color: var(--ink); }
 .pb-ibtn:disabled { opacity: .35; cursor: default; background: none; }
 .pb-select {
-  border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 9px;
-  padding: 5px 8px; font: inherit; font-size: 13px; max-width: 220px;
+  border: 1px solid var(--glass-line); background: var(--field); color: var(--ink); border-radius: 999px; box-shadow: var(--glass-hi);
+  padding: 5px 10px; font: inherit; font-size: 13px; max-width: 220px;
 }
 .pb-chip-ver {
   font: 500 11px/1 var(--mono); letter-spacing: .02em; color: var(--muted);
-  border: 1px solid var(--line); border-radius: 999px; padding: 5px 8px; background: var(--panel);
+  border: 1px solid var(--line); border-radius: 999px; padding: 5px 8px; background: var(--field);
 }
 .pb-num { font-variant-numeric: tabular-nums; }
 .pb-kbd { font: 11px var(--mono); color: var(--faint); }
@@ -139,16 +161,23 @@ button { font: inherit; color: inherit; }
 @keyframes pb-pulse { 50% { box-shadow: 0 0 0 2px var(--accent), 0 0 0 7px var(--accent-soft), 0 3px 8px rgba(0, 0, 0, .25); } }
 @media (prefers-reduced-motion: reduce) { .pb-pin.draft { animation: none; } }
 
-/* ---------- sidebar ---------- */
+/* ---------- patches panel ---------- */
 #pb-side {
-  min-width: 0; min-height: 0; display: flex; flex-direction: column;
-  background: var(--panel); border: 0; border-left: 1px solid var(--line); border-radius: 0; overflow: hidden;
+  min-width: 0; min-height: 0; display: flex; flex-direction: column; position: relative;
+  background: linear-gradient(180deg, var(--glass-2), var(--glass));
+  border-left: 1px solid var(--glass-line); box-shadow: inset 1px 0 0 var(--glass-edge); overflow: hidden;
 }
-.pb-rail { display: none; }
-.pb-sum { display: none; }
+.pb-drawer { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.pb-rail, .pb-open, .pb-scrim { display: none; }
 .pb-toggle { flex: none; margin-left: -2px; }
-.pb-toggle svg { transition: transform .2s; }
-.pb-toggle.flip svg { transform: rotate(180deg); }
+.pb-head { display: flex; align-items: center; gap: 10px; padding: 12px 12px 10px 16px; border-bottom: 1px solid var(--glass-line); }
+.pb-title { font: 650 16px/1.2 var(--font); letter-spacing: -.015em; flex: 1; display: flex; align-items: center; gap: 8px; }
+.pb-seg .pb-count { font: 500 11px var(--mono); color: var(--faint); }
+.pb-seg button[aria-pressed="true"] .pb-count { color: var(--accent); }
+.pb-list { flex: 1; overflow-y: auto; overscroll-behavior: contain; padding: 6px; display: flex; flex-direction: column; gap: 2px; min-height: 0; }
+.pb-empty { margin: auto; padding: 28px 22px; text-align: center; color: var(--muted); font-size: 13px; max-width: 30ch; text-wrap: balance; }
+.pb-empty svg { width: 22px; height: 22px; color: var(--faint); display: block; margin: 0 auto 10px; }
+
 @media (min-width: 861px) {
   #pb-app.collapsed #pb-side > :not(.pb-rail) { display: none; }
   #pb-app.collapsed .pb-rail {
@@ -156,39 +185,57 @@ button { font: inherit; color: inherit; }
     width: 100%; height: 100%; cursor: pointer; color: var(--muted);
   }
   #pb-app.collapsed .pb-rail:hover { color: var(--ink); }
-  .pb-rail .pb-mark { width: 16px; height: 16px; color: var(--ink); }
   .pb-rail-count {
     min-width: 22px; height: 22px; border-radius: 11px; padding: 0 6px; box-sizing: border-box; background: var(--accent); color: var(--on-accent);
     font: 600 11px/22px var(--font); text-align: center;
   }
-  .pb-head .pb-toggle { order: 3; }
 }
+
+/* Phones: the work goes edge to edge, the input docks below it, patches slide in from the right. */
 @media (max-width: 860px) {
-  #pb-side { border-radius: 16px 16px 0 0; border: 0; border-top: 1px solid var(--line); }
-  .pb-head { cursor: pointer; padding: 8px 8px 8px 14px; }
-  .pb-title { font-size: 15px; }
-  .pb-sum { display: inline; font: 400 12px var(--font); color: var(--muted); margin-left: 2px; }
-  .pb-list { max-height: 42vh; }
-  #pb-app.collapsed .pb-list, #pb-app.collapsed .pb-handoff, #pb-app.collapsed .pb-head .pb-seg { display: none; }
-  #pb-app.collapsed .pb-head { border-bottom: 0; }
-  #pb-app.collapsed .pb-foot { border-top: 0; padding-top: 0; }
-  #pb-app:not(.collapsed) .pb-sum { display: none; }
+  #pb-app, #pb-app.collapsed { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; }
+  #pb-side { background: none; border: 0; box-shadow: none; overflow: visible; }
+  .pb-drawer {
+    position: fixed; top: 0; right: 0; bottom: 0; z-index: 60; width: min(88vw, 380px); box-sizing: border-box;
+    padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) 0;
+    background: var(--glass-2); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
+    border-left: 1px solid var(--glass-edge); border-radius: 26px 0 0 26px;
+    box-shadow: var(--glass-hi), -18px 0 50px rgba(0, 0, 0, .18);
+    transform: translate3d(0, 0, 0); transition: transform .34s var(--ease), visibility 0s;
+  }
+  #pb-app.collapsed .pb-drawer { transform: translate3d(106%, 0, 0); visibility: hidden; transition: transform .28s var(--ease), visibility 0s .28s; }
+  .pb-scrim {
+    display: block; position: fixed; inset: 0; z-index: 55; background: var(--scrim); opacity: 1; transition: opacity .28s ease, visibility 0s;
+  }
+  #pb-app.collapsed .pb-scrim { opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .28s ease, visibility 0s .28s; }
+  .pb-head { padding: 14px 10px 10px 18px; }
+  .pb-title { font-size: 17px; }
+  .pb-open {
+    display: grid; place-items: center; position: relative; flex: none; width: 44px; height: 44px; border-radius: 50%; padding: 0; cursor: pointer;
+    border: 1px solid var(--glass-line); background: var(--field); color: var(--ink); box-shadow: var(--glass-hi), 0 2px 10px rgba(0, 0, 0, .06);
+  }
+  .pb-open svg { width: 19px; height: 19px; }
+  .pb-open-count {
+    position: absolute; top: -3px; right: -3px; min-width: 18px; height: 18px; border-radius: 9px; padding: 0 5px; box-sizing: border-box;
+    background: var(--accent); color: var(--on-accent); font: 600 10.5px/18px var(--font); text-align: center; box-shadow: 0 0 0 2px var(--panel);
+  }
+  .pb-foot {
+    border-top: 1px solid var(--glass-line); background: linear-gradient(180deg, var(--glass-2), var(--glass)); box-shadow: var(--glass-hi);
+    padding: 8px 10px max(8px, calc(env(safe-area-inset-bottom, 0px) - 8px));
+  }
+  .pb-note:not(.ro) { display: none; }
+  .pb-handoff { padding-bottom: 12px; }
+  .pb-fab { bottom: 10px; }
+  .pb-bar { padding: 4px 6px; gap: 6px; min-height: 0; }
+  .pb-bar .pb-seg button { padding: 4px 8px; }
 }
-.pb-head { display: flex; align-items: center; gap: 10px; padding: 12px 12px 10px 16px; border-bottom: 1px solid var(--line); }
-.pb-title { font: 650 16px/1.2 var(--font); letter-spacing: -.015em; flex: 1; display: flex; align-items: center; gap: 8px; }
-.pb-title .pb-mark { width: 16px; height: 16px; color: var(--accent); }
-.pb-seg .pb-count { font: 500 11px var(--mono); color: var(--faint); }
-.pb-seg button[aria-pressed="true"] .pb-count { color: var(--accent); }
-.pb-list { flex: 1; overflow-y: auto; padding: 6px; display: flex; flex-direction: column; gap: 2px; min-height: 120px; }
-.pb-empty { margin: auto; padding: 28px 22px; text-align: center; color: var(--muted); font-size: 13px; max-width: 30ch; text-wrap: balance; }
-.pb-empty svg { width: 22px; height: 22px; color: var(--faint); display: block; margin: 0 auto 10px; }
 
 .pb-item {
   display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; gap: 10px; align-items: start;
-  padding: 10px 8px 10px 10px; border-radius: 10px; cursor: pointer; position: relative;
+  padding: 10px 8px 10px 10px; border-radius: 14px; cursor: pointer; position: relative; transition: background .15s;
 }
 .pb-item:hover { background: var(--line); }
-.pb-item.sel { background: var(--accent-soft); }
+.pb-item.sel { background: var(--field); box-shadow: var(--glass-hi), 0 1px 6px rgba(0, 0, 0, .06); }
 .pb-badge {
   width: 22px; height: 22px; border-radius: 50% 50% 50% 0; background: var(--accent); color: var(--on-accent);
   font: 600 10.5px/22px var(--font); text-align: center; margin-top: 1px;
@@ -200,31 +247,33 @@ button { font: inherit; color: inherit; }
 .pb-who { width: 16px; height: 16px; border-radius: 50%; flex: none; font: 600 9px/16px var(--font); text-align: center; color: #fff; }
 .pb-text { margin-top: 2px; white-space: pre-wrap; overflow-wrap: anywhere; }
 .pb-item.done .pb-text { color: var(--muted); }
-.pb-text[contenteditable="true"] { outline: 1px solid var(--line-strong); border-radius: 6px; padding: 2px 4px; margin-left: -4px; cursor: text; background: var(--panel); }
+.pb-text[contenteditable="true"] { box-shadow: 0 0 0 1px var(--line-strong); border-radius: 8px; padding: 2px 5px; margin-left: -5px; cursor: text; background: var(--field); }
 .pb-shots { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
 .pb-shots img {
-  width: 54px; height: 40px; object-fit: cover; border-radius: 6px; border: 1px solid var(--line); display: block; cursor: zoom-in; background: var(--stage);
+  width: 54px; height: 40px; object-fit: cover; border-radius: 8px; border: 1px solid var(--line); display: block; cursor: zoom-in; background: var(--stage);
 }
 .pb-reply {
-  margin-top: 8px; padding: 7px 9px; border-radius: 8px; background: var(--line); font-size: 12.5px;
+  margin-top: 8px; padding: 7px 10px; border-radius: 12px; background: var(--line); font-size: 12.5px;
   display: flex; gap: 7px; align-items: flex-start;
 }
-.pb-reply svg { width: 13px; height: 13px; color: var(--accent); flex: none; margin-top: 2px; }
 .pb-state { margin-top: 6px; font-size: 11.5px; color: var(--work); display: inline-flex; align-items: center; gap: 6px; }
 .pb-state::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; animation: pb-blink 1.2s ease-in-out infinite; }
 @keyframes pb-blink { 50% { opacity: .25; } }
 .pb-acts { display: flex; gap: 0; opacity: 0; transition: opacity .12s; }
 .pb-item:hover .pb-acts, .pb-item.sel .pb-acts, .pb-item:focus-within .pb-acts { opacity: 1; }
 @media (hover: none) { .pb-acts { opacity: 1; } }
-.pb-acts .pb-ibtn { width: 26px; height: 26px; }
+.pb-acts .pb-ibtn { width: 28px; height: 28px; }
 .pb-acts .pb-ok:hover { color: var(--ok); background: var(--ok-soft); }
 .pb-acts .pb-del.armed { color: #fff; background: #b4483a; }
 
-.pb-foot { border-top: 1px solid var(--line); padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+.pb-foot { border-top: 1px solid var(--glass-line); padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+.pb-frow { display: flex; align-items: flex-end; gap: 8px; }
 .pb-compose {
-  border: 1px solid var(--line-strong); border-radius: 12px; background: var(--panel);
-  padding: 5px 5px 5px 12px; display: flex; flex-direction: column; gap: 6px;
+  flex: 1; min-width: 0; border: 1px solid var(--glass-line); border-radius: 22px; background: var(--field);
+  box-shadow: var(--glass-hi), 0 2px 12px rgba(0, 0, 0, .05);
+  padding: 6px 6px 6px 14px; display: flex; flex-direction: column; gap: 6px; transition: border-color .15s, box-shadow .15s;
 }
+.pb-compose:focus-within { border-color: var(--line-strong); box-shadow: var(--glass-hi), 0 4px 18px rgba(0, 0, 0, .09); }
 .pb-compose.drag { border-style: dashed; }
 .pb-ctx { display: flex; align-items: center; gap: 6px; min-width: 0; height: 18px; margin-top: 3px; padding-right: 4px; font-size: 12px; color: var(--muted); }
 .pb-ctx.general { color: var(--faint); }
@@ -232,17 +281,17 @@ button { font: inherit; color: inherit; }
 .pb-ctx-ico svg { width: 12px; height: 12px; }
 .pb-ctx-text { font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
 .pb-ctx-x {
-  margin-left: auto; flex: none; width: 18px; height: 18px; border: 0; padding: 0; border-radius: 6px; background: none;
+  margin-left: auto; flex: none; width: 20px; height: 20px; border: 0; padding: 0; border-radius: 50%; background: none;
   color: var(--faint); display: grid; place-items: center; cursor: pointer;
 }
 .pb-ctx-x:hover { color: var(--ink); background: var(--line); }
 .pb-ctx-x svg { width: 11px; height: 11px; }
 .pb-dshots { display: flex; gap: 8px; flex-wrap: wrap; }
 .pb-dshot { position: relative; width: 52px; height: 52px; flex: none; }
-.pb-dshot img { width: 100%; height: 100%; object-fit: cover; border-radius: 9px; border: 1px solid var(--line); display: block; cursor: zoom-in; background: var(--stage); }
+.pb-dshot img { width: 100%; height: 100%; object-fit: cover; border-radius: 11px; border: 1px solid var(--line); display: block; cursor: zoom-in; background: var(--stage); }
 .pb-dshot.pending img { opacity: .4; }
 .pb-dshot button {
-  position: absolute; top: 3px; right: 3px; width: 18px; height: 18px; border-radius: 6px; border: 0; padding: 0;
+  position: absolute; top: 3px; right: 3px; width: 18px; height: 18px; border-radius: 50%; border: 0; padding: 0;
   background: rgba(20, 20, 19, .72); color: #fff; display: grid; place-items: center; cursor: pointer; opacity: 0; transition: opacity .12s;
 }
 .pb-dshot:hover button, .pb-dshot button:focus-visible { opacity: 1; }
@@ -256,103 +305,106 @@ button { font: inherit; color: inherit; }
 .pb-crow { display: flex; align-items: flex-end; gap: 1px; }
 .pb-crow .pb-ibtn { width: 30px; height: 30px; flex: none; }
 .pb-send {
-  flex: none; margin-left: 2px; width: 30px; height: 30px; border-radius: 8px; border: 0; background: var(--accent); color: var(--on-accent);
-  display: grid; place-items: center; cursor: pointer; transition: background .15s, color .15s;
+  flex: none; margin-left: 2px; width: 30px; height: 30px; border-radius: 50%; border: 0; background: var(--accent); color: var(--on-accent);
+  display: grid; place-items: center; cursor: pointer; transition: background .15s, color .15s, transform .15s var(--ease);
 }
+.pb-send:not(:disabled):active { transform: scale(.92); }
 .pb-send:disabled { background: var(--line); color: var(--faint); cursor: default; }
 .pb-send svg { width: 15px; height: 15px; }
-.pb-handoff { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); padding: 0 2px; min-width: 0; }
-.pb-handoff > span { white-space: nowrap; flex: none; }
-.pb-handoff code { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.pb-handoff .pb-ibtn { flex: none; }
-.pb-handoff code { font: 11px var(--mono); color: var(--ink); background: var(--line); padding: 2px 5px; border-radius: 5px; letter-spacing: -.01em; }
-.pb-handoff .pb-ibtn { width: 24px; height: 24px; }
+.pb-handoff { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); padding: 8px 14px; border-top: 1px solid var(--glass-line); min-width: 0; }
+.pb-handoff > span { white-space: nowrap; flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.pb-handoff code { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 11px var(--mono); color: var(--ink); background: var(--line); padding: 3px 7px; border-radius: 999px; letter-spacing: -.01em; }
+.pb-handoff .pb-ibtn { flex: none; width: 24px; height: 24px; }
 .pb-handoff .pb-ibtn svg { width: 13px; height: 13px; }
-.pb-note { font-size: 11.5px; color: var(--faint); padding: 0 2px; }
-.pb-copyall { padding: 3px 9px; font-size: 12px; }
+.pb-note { font-size: 11.5px; color: var(--faint); padding: 0 4px; }
+.pb-copyall { padding: 3px 10px; font-size: 12px; flex: none; white-space: nowrap; }
 
 /* ---------- overlays ---------- */
 .pb-dropzone {
-  position: absolute; inset: 10px; border: 2px dashed var(--accent); border-radius: 12px; background: var(--accent-soft);
+  position: absolute; inset: 10px; border: 2px dashed var(--accent); border-radius: 22px; background: var(--glass);
+  -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
   display: grid; place-items: center; color: var(--accent); font-weight: 600; z-index: 20; pointer-events: none;
 }
-.pb-lightbox { position: fixed; inset: 0; background: rgba(15, 14, 13, .82); display: grid; place-items: center; z-index: 100; cursor: zoom-out; padding: 24px; }
-.pb-lightbox img { max-width: 100%; max-height: 100%; border-radius: 8px; box-shadow: 0 20px 60px rgba(0, 0, 0, .5); }
+.pb-lightbox {
+  position: fixed; inset: 0; background: rgba(15, 14, 13, .6); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px);
+  display: grid; place-items: center; z-index: 100; cursor: zoom-out; padding: 24px;
+}
+.pb-lightbox img { max-width: 100%; max-height: 100%; border-radius: 14px; box-shadow: 0 20px 60px rgba(0, 0, 0, .5); }
 .pb-toast {
-  position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%);
-  background: var(--ink); color: var(--panel); padding: 8px 14px; border-radius: 10px; font-size: 13px; z-index: 120; box-shadow: var(--shadow);
-  max-width: calc(100vw - 32px);
+  position: fixed; left: 50%; top: calc(14px + env(safe-area-inset-top, 0px)); transform: translateX(-50%);
+  background: var(--glass-solid); color: var(--ink); border: 1px solid var(--glass-edge);
+  -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
+  padding: 8px 16px; border-radius: 999px; font-size: 13px; z-index: 120; box-shadow: var(--glass-hi), var(--glass-drop);
+  max-width: calc(100vw - 32px); box-sizing: border-box; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .pb-placeholder { margin: auto; text-align: center; color: var(--muted); padding: 32px; max-width: 36ch; }
 .pb-placeholder b { display: block; font: 650 15px var(--font); color: var(--ink); margin-bottom: 4px; }
 
 /* ---------- image canvas ---------- */
 .ic { position: relative; flex: 1; min-height: 0; overflow: hidden; touch-action: none; }
-.ic-inner { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.ic-inner { position: absolute; left: 0; top: 0; transform-origin: 0 0; will-change: transform; }
 .ic-img { display: block; width: 100%; height: 100%; user-select: none; -webkit-user-drag: none; box-shadow: var(--shadow); background: var(--panel); }
 .ic-layer { position: absolute; inset: 0; pointer-events: none; }
 .ic.comment { cursor: crosshair; }
 .ic.browse { cursor: grab; }
 .ic.panning { cursor: grabbing; }
-.ic-zoom { position: absolute; right: calc(10px + env(safe-area-inset-right, 0px)); bottom: 10px; display: flex; align-items: center; gap: 2px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 2px; box-shadow: var(--shadow); z-index: 4; }
+.ic-zoom, .pd-zoom {
+  position: absolute; right: calc(10px + env(safe-area-inset-right, 0px)); bottom: 10px; display: flex; align-items: center; gap: 2px;
+  background: var(--glass-2); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
+  border: 1px solid var(--glass-edge); border-radius: 999px; padding: 3px; box-shadow: var(--glass-hi), var(--glass-drop); z-index: 4;
+}
 .ic-zoom .pb-ibtn { width: 28px; height: 28px; }
 .ic-zoom output { font: 11px var(--mono); color: var(--muted); min-width: 42px; text-align: center; cursor: pointer; }
 
 /* ---------- timeline ---------- */
-.tl { position: relative; height: 74px; touch-action: none; cursor: pointer; user-select: none; transition: height .22s cubic-bezier(.2,.8,.2,1); }
+.tl { position: relative; height: 74px; touch-action: none; cursor: pointer; user-select: none; -webkit-user-select: none; transition: height .22s var(--ease); }
 .tl.tl-big { height: 140px; }
-.tl canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.tl canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.tl-ph {
+  position: absolute; left: -1px; top: 24px; bottom: 0; width: 2px; border-radius: 1px; background: var(--ink);
+  pointer-events: none; will-change: transform; transform: translate3d(0, 0, 0);
+}
+.tl-ph::before { content: ""; position: absolute; left: 50%; top: -4px; width: 8px; height: 8px; margin-left: -4px; border-radius: 50%; background: inherit; }
 .tl-tip {
   position: absolute; top: -26px; transform: translateX(-50%); font: 11px var(--mono); background: var(--ink); color: var(--panel);
-  padding: 3px 6px; border-radius: 6px; pointer-events: none; white-space: nowrap;
+  padding: 3px 8px; border-radius: 999px; pointer-events: none; white-space: nowrap; z-index: 2;
 }
 
 /* ---------- comment button ---------- */
 .pb-fab {
   position: absolute; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 15;
   display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 18px 0 14px; border-radius: 999px;
-  border: 1px solid var(--line-strong); background: var(--panel); color: var(--ink); font: 500 14px var(--font); cursor: pointer;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, .16), 0 1px 3px rgba(0, 0, 0, .1); white-space: nowrap; transition: background .15s, color .15s;
-  -webkit-tap-highlight-color: transparent;
+  border: 1px solid var(--glass-edge); background: var(--glass-2); color: var(--ink); font: 500 14px var(--font); cursor: pointer;
+  -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
+  box-shadow: var(--glass-hi), var(--glass-drop); white-space: nowrap;
+  transition: background .15s, color .15s, padding .28s var(--ease), gap .28s, transform .15s var(--ease);
 }
-.pb-fab:hover { border-color: var(--ink); }
-.pb-fab[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: transparent; }
+.pb-fab:active { transform: translateX(-50%) scale(.96); }
+.pb-fab[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; }
 .pb-fab-ico { width: 18px; height: 18px; display: grid; place-items: center; flex: none; }
-.pb-fab { transition: background .15s, color .15s, padding .28s cubic-bezier(.2,.8,.2,1), gap .28s; }
-.pb-fab-label { display: inline-block; overflow: hidden; max-width: 260px; opacity: 1; transition: max-width .3s cubic-bezier(.2,.8,.2,1), opacity .2s; }
+.pb-fab-label { display: inline-block; overflow: hidden; max-width: 260px; opacity: 1; transition: max-width .3s var(--ease), opacity .2s; }
 .pb-fab.mini { padding: 0 13px; gap: 0; }
 .pb-fab.mini .pb-fab-label { max-width: 0; opacity: 0; }
 .pb-fab-ico svg { width: 18px; height: 18px; }
-
-/* ---------- patches below the work (audio, video) ---------- */
-#pb-app.below { height: auto; min-height: 100%; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto; align-content: start; }
-#pb-app.below .pb-stage { height: var(--stage-h, 66vh); min-height: 260px; }
-#pb-app.below #pb-side { padding: 0 max(14px, env(safe-area-inset-right, 0px)) 18px max(14px, env(safe-area-inset-left, 0px)); }
-#pb-app.below #pb-side > .pb-rail, #pb-app.below .pb-toggle { display: none !important; }
-#pb-app.below #pb-side { border: 0; border-radius: 0; background: transparent; overflow: visible; }
-#pb-app.below .pb-foot { order: -1; border-top: 0; padding: 0 0 4px; }
-#pb-app.below .pb-head { border-bottom: 0; padding: 10px 2px 4px; cursor: default; }
-#pb-app.below .pb-list { max-height: none; overflow: visible; padding: 0; min-height: 0; }
-#pb-app.below .pb-list, #pb-app.below .pb-handoff, #pb-app.below .pb-head .pb-seg { display: flex !important; }
-#pb-app.below .pb-sum { display: none !important; }
-#pb-app.below .pb-empty { padding: 18px; }
-@media (max-width: 860px) { #pb-app.below .pb-stage { height: var(--stage-h-m, var(--stage-h, 56vh)); } }
 
 .pb-scope { align-self: flex-start; margin: 6px 10px 4px; border: 0; background: none; padding: 4px 0; font-size: 12px; color: var(--muted); cursor: pointer; text-decoration: underline; text-decoration-color: var(--line-strong); text-underline-offset: 3px; }
 .pb-scope:hover { color: var(--ink); }
 .pb-empty + .pb-scope { align-self: center; margin-top: -8px; }
 
-
-/* Phones: inputs at 16px so iOS never zooms the page while typing; no double-tap zoom either */
-html, body { touch-action: manipulation; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+/* Touch: fields at 16px so iOS never zooms the page while typing */
 @media (pointer: coarse) {
   input, textarea, select, [contenteditable="true"], [contenteditable=""] { font-size: 16px !important; }
   .pb-ta { line-height: 22px; height: 22px; min-height: 22px; }
+  .pb-crow .pb-ibtn, .pb-send { width: 32px; height: 32px; }
+}
+/* Browsers without backdrop blur get an opaque sheet instead of a see-through one */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .pb-drawer, .pb-fab, .ic-zoom, .pd-zoom, .pb-toast, .pb-dropzone { background: var(--glass-solid); }
 }
 /* interface surface */
 .if-area { position: relative; flex: 1; min-height: 0; overflow: hidden; }
 .if-frame { position: absolute; transform-origin: 0 0; background: #fff; box-sizing: content-box; }
-.if-frame.fixed { border-radius: 8px; overflow: hidden; box-shadow: var(--shadow), 0 0 0 1px var(--line); }
+.if-frame.fixed { border-radius: 10px; overflow: hidden; box-shadow: var(--shadow), 0 0 0 1px var(--line); }
 .if-frame.device { border: 12px solid #0e0e0d; border-radius: 46px; overflow: hidden; box-shadow: 0 0 0 1px var(--line-strong), 0 20px 50px rgba(0, 0, 0, .22); }
 .if-iframe { width: 100%; height: 100%; border: 0; display: block; background: #fff; }
 .if-catch { position: absolute; inset: 0; cursor: crosshair; }
@@ -363,8 +415,9 @@ html, body { touch-action: manipulation; -webkit-text-size-adjust: 100%; text-si
 @media (max-width: 1180px) { .pb-mlabel { display: none; } }
 @media (max-width: 560px) { .if-width, .if-reload { display: none; } .pb-bar { flex-wrap: nowrap; gap: 6px; } .pb-bar .pb-select { max-width: 104px; min-width: 0; } .pb-seg button { padding: 5px 7px; } }
 .if-edge {
-  position: absolute; transform: translateX(-50%); z-index: 12; height: 28px; padding: 0 12px; border-radius: 999px; border: 0;
-  background: var(--accent); color: var(--on-accent); font: 600 12px var(--font); cursor: pointer; box-shadow: 0 4px 14px rgba(0, 0, 0, .22);
+  position: absolute; transform: translateX(-50%); z-index: 12; height: 28px; padding: 0 12px; border-radius: 999px;
+  background: var(--glass-2); color: var(--ink); font: 600 12px var(--font); cursor: pointer; border: 1px solid var(--glass-edge);
+  -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur); box-shadow: var(--glass-hi), var(--glass-drop);
 }
 .if-edge.down { bottom: 64px; }
 </style>
@@ -408,8 +461,8 @@ const PB = (() => {
       patches: "Patches", open: "Offen", openN: "offen", collapse: "Patches einklappen", expand: "Patches ausklappen", done: "Erledigt", working: "Claude arbeitet daran",
       placeholder: "Was soll sich ändern?", general: "Allgemein", browse: "Ansehen", comment: "Kommentieren",
       emptyOpen: "Noch keine Patches. Tippe auf Kommentieren und dann auf eine Stelle.", tapSpot: "Tippe auf eine Stelle",
-      emptyOpenTime: "Noch keine Patches. Einfach oben tippen, der Zeitstempel kommt automatisch.",
-      emptyDone: "Noch nichts erledigt.", otherPages: "+{n} auf anderen Seiten", otherImages: "+{n} auf anderen Bildern", thisPageOnly: "Nur diese Seite", thisImageOnly: "Nur dieses Bild",
+      emptyOpenTime: "Noch keine Patches. Schreib einfach los, der Zeitstempel kommt automatisch.", close: "Schließen", mediaFail: "Datei konnte nicht geladen werden",
+      emptyDone: "Noch nichts erledigt.", allDone: "Alles erledigt.", otherPages: "+{n} auf anderen Seiten", otherImages: "+{n} auf anderen Bildern", thisPageOnly: "Nur diese Seite", thisImageOnly: "Nur dieses Bild",
       attach: "Screenshot anhängen", drop: "Screenshot hier ablegen", local: "Patches bleiben in diesem Browser.",
       readonly: "Nur Lesen. Zum Kommentieren braucht es Bearbeitungsrechte.",
       handoff: "Fertig? Schreib Claude:", handoffText: "Patches abarbeiten", handoffLocal: "Fertig? Kopieren und in den Chat einfügen:", copyPatches: "Patches kopieren", shotNote: "Screenshot im Chat anhängen", copied: "Kopiert", copy: "Kopieren",
@@ -426,8 +479,8 @@ const PB = (() => {
       patches: "Patches", open: "Open", openN: "open", collapse: "Collapse patches", expand: "Expand patches", done: "Done", working: "Claude is on it",
       placeholder: "What should change?", general: "General", browse: "Browse", comment: "Comment",
       emptyOpen: "No patches yet. Tap Comment, then tap a spot.", tapSpot: "Tap a spot",
-      emptyOpenTime: "No patches yet. Just type above, the timestamp is added for you.",
-      emptyDone: "Nothing done yet.", otherPages: "+{n} on other pages", otherImages: "+{n} on other images", thisPageOnly: "This page only", thisImageOnly: "This image only",
+      emptyOpenTime: "No patches yet. Just start typing, the timestamp is added for you.", close: "Close", mediaFail: "The file could not be loaded",
+      emptyDone: "Nothing done yet.", allDone: "All done.", otherPages: "+{n} on other pages", otherImages: "+{n} on other images", thisPageOnly: "This page only", thisImageOnly: "This image only",
       attach: "Attach screenshot", drop: "Drop screenshot here", local: "Patches stay in this browser.",
       readonly: "Read only. Commenting needs edit access.",
       handoff: "Done? Say:", handoffText: "Work through the patches", handoffLocal: "Done? Copy and paste into the chat:", copyPatches: "Copy patches", shotNote: "attach the screenshot in the chat", copied: "Copied", copy: "Copy",
@@ -452,6 +505,7 @@ const PB = (() => {
     pinMini: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3a8 8 0 0 1 0 16H4v-8a8 8 0 0 1 8-8z"/></svg>',
     dot: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="6"/></svg>',
     panel: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M15 4v16"/></svg>',
+    list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 7h11M9 12h11M9 17h11"/><circle cx="4.5" cy="7" r="1" fill="currentColor"/><circle cx="4.5" cy="12" r="1" fill="currentColor"/><circle cx="4.5" cy="17" r="1" fill="currentColor"/></svg>',
     chev: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg>',
     x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
     trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>',
@@ -509,6 +563,15 @@ const PB = (() => {
   const visible = () => S.patches.filter((p) => inTab(p, S.filter) && inScope(p));
   const blobUrl = (id) => (String(id).startsWith("data:") ? id : localBlobs.get(id) || "/_blob/" + id);
   function changed() { renderList(); O.onChange && O.onChange(); saveLocal(); }
+  // Theme colours for canvas drawing, read once and refreshed only when the theme changes.
+  let PAL = null;
+  function pal() {
+    if (PAL) return PAL;
+    const cs = getComputedStyle(document.documentElement), v = (n) => cs.getPropertyValue(n).trim();
+    return (PAL = { ink: v("--ink"), muted: v("--muted"), faint: v("--faint"), line: v("--line"), lineS: v("--line-strong"), acc: v("--accent"), accSoft: v("--accent-soft"),
+      panel: v("--panel"), work: v("--work"), ok: v("--ok"), donePin: v("--done-pin"), onAcc: v("--on-accent"), font: v("--font"), mono: v("--mono") });
+  }
+  function retheme() { PAL = null; O.onChange && O.onChange(); }
 
   // ---------- connect ----------
   async function connect() {
@@ -579,11 +642,16 @@ const PB = (() => {
       anchor: anchor || null, label: label || t("general"), shots: shots.map((s) => s.id),
       created: Date.now(), author: S.me || null,
     };
+    const keep = { ...S.draft };
     ui.ta.value = ""; autosize();
     clearDraft(true); updateSend();
     if (col) {
-      try { const ref = await col.add(doc); S.sel = ref.id; }
-      catch (e) { ui.ta.value = text; toast(t("saveFail") + (e && e.code ? " (" + e.code + ")" : "")); if (e && e.code === "invalid_argument") { S.readonly = true; renderFoot(); } }
+      try { const ref = await col.add(doc); S.sel = ref.id; changed(); }
+      catch (e) {
+        // nothing is lost: text, place and screenshots come back
+        if (!ui.ta.value) { ui.ta.value = text; autosize(); Object.assign(S.draft, keep); renderDraft(); O.onChange && O.onChange(); }
+        toast(t("saveFail") + (e && e.code ? " (" + e.code + ")" : "")); if (e && e.code === "invalid_argument") { S.readonly = true; renderFoot(); }
+      }
     } else { const id = "local-" + n; S.patches.push({ id, ...doc }); S.sel = id; changed(); }
   }
   async function patchUpdate(p, fields) {
@@ -670,15 +738,21 @@ const PB = (() => {
     if (withShots) S.draft.shots = [];
     renderDraft(); O.onChange && O.onChange();
   }
-  function renderDraft() {
+  let ctxState = null;
+  function renderCtx() {
     let label = S.draft.label, general = !S.draft.anchor;
     if (!S.draft.anchor && !S.draft.general && O.defaultAnchor) { const d = O.defaultAnchor(); if (d) { label = d.label; general = false; } }
-    ui.ctx.classList.toggle("general", general);
-    ui.ctxIcon.innerHTML = general ? I.dot : I.pinMini;
-    ui.ctxText.textContent = general ? t("general") : label;
-    ui.ctxText.title = general ? "" : label;
-    ui.ctxX.hidden = general;
-    ui.ctx.hidden = general;
+    if (ctxState !== general) {
+      ctxState = general;
+      ui.ctx.classList.toggle("general", general);
+      ui.ctxIcon.innerHTML = general ? I.dot : I.pinMini;
+      ui.ctxX.hidden = general; ui.ctx.hidden = general;
+    }
+    const text = general ? t("general") : label;
+    if (ui.ctxText.textContent !== text) { ui.ctxText.textContent = text; ui.ctxText.title = general ? "" : label; }
+  }
+  function renderDraft() {
+    renderCtx();
     const row = ui.dshots; row.textContent = "";
     for (const s of S.draft.shots) {
       row.append(h("span", { class: "pb-dshot" + (s.pending ? " pending" : "") },
@@ -689,7 +763,7 @@ const PB = (() => {
     updateSend();
   }
   function updateSend() { if (ui.send) ui.send.disabled = S.readonly || !(ui.ta.value.trim() || S.draft.shots.some((x) => !x.pending)); }
-  const refreshChip = () => ui.ctx && renderDraft();
+  const refreshChip = () => ui.ctx && renderCtx();
 
   // ---------- sidebar ----------
   function mount() {
@@ -701,10 +775,8 @@ const PB = (() => {
         h("span", { text: t(f) }), h("span", { class: "pb-count pb-num", text: "0" }));
       ui.tabs[f] = b; seg.append(b);
     }
-    ui.sum = h("span", { class: "pb-sum pb-num" });
     ui.toggle = h("button", { class: "pb-ibtn pb-toggle", "aria-label": t("collapse"), title: t("collapse"), onclick: (e) => { e.stopPropagation(); setCollapsed(!S.collapsed); } });
-    const head = h("header", { class: "pb-head" }, h("div", { class: "pb-title" }, t("patches"), ui.sum), seg, ui.toggle);
-    head.addEventListener("click", (e) => { if (O.layout !== "below" && mobile() && !e.target.closest(".pb-seg")) setCollapsed(!S.collapsed); });
+    const head = h("header", { class: "pb-head" }, h("div", { class: "pb-title", text: t("patches") }), seg, ui.toggle);
     ui.railCount = h("span", { class: "pb-rail-count pb-num" });
     ui.rail = h("button", { class: "pb-rail", "aria-label": t("expand"), title: t("expand"), onclick: () => setCollapsed(false) },
       h("span", { class: "pb-ibtn", html: I.panel }), ui.railCount);
@@ -729,8 +801,13 @@ const PB = (() => {
     ui.copyBtn = copyBtn;
     ui.handoff = h("div", { class: "pb-handoff" }, ui.handoffLabel, ui.handoffCode, copyBtn, ui.copyAll);
     ui.note = h("div", { class: "pb-note", hidden: true });
-    side.append(ui.rail, head, ui.list, h("div", { class: "pb-foot" }, ui.compose, ui.handoff, ui.note));
-    document.getElementById("pb-app").append(side);
+    // The list never sits under the input: on desktop it is the panel above it, on phones it slides in from the right.
+    ui.openCount = h("span", { class: "pb-open-count pb-num", hidden: true });
+    ui.open = h("button", { class: "pb-open", id: "pb-open", "aria-label": t("expand"), title: t("patches"), html: I.list, onclick: () => setCollapsed(false) }, ui.openCount);
+    ui.drawer = h("div", { class: "pb-drawer" }, head, ui.list, ui.handoff);
+    ui.scrim = h("div", { class: "pb-scrim", onclick: () => setCollapsed(true) });
+    side.append(ui.rail, ui.drawer, h("div", { class: "pb-foot" }, h("div", { class: "pb-frow" }, ui.compose, ui.open), ui.note));
+    document.getElementById("pb-app").append(side, ui.scrim);
 
     ui.ta.addEventListener("input", () => { autosize(); updateSend(); O.onTyping && O.onTyping(); });
     ui.ta.addEventListener("focus", () => { O.onTyping && O.onTyping(); refreshChip(); });
@@ -739,25 +816,34 @@ const PB = (() => {
       else if (e.key === "Escape") { e.preventDefault(); if (S.draft.anchor) clearDraft(); ui.ta.blur(); }
     });
     dropTarget(ui.compose, (files) => attach(files), (on) => ui.compose.classList.toggle("drag", on));
+    // swipe the panel away to the right on phones
+    let sw = null;
+    ui.drawer.addEventListener("touchstart", (e) => { const p = e.touches[0]; sw = e.touches.length === 1 ? { x: p.clientX, y: p.clientY } : null; }, { passive: true });
+    ui.drawer.addEventListener("touchmove", (e) => {
+      if (!sw || !mobile()) return; const p = e.touches[0], dx = p.clientX - sw.x, dy = p.clientY - sw.y;
+      if (dx > 56 && Math.abs(dx) > Math.abs(dy) * 1.6) { sw = null; setCollapsed(true); }
+    }, { passive: true });
     renderTabs(); renderDraft(); renderFoot();
-    let stored = null; try { stored = localStorage.getItem("pb-collapsed-" + CFG.kind); } catch {}
-    if (O.layout === "below") { document.getElementById("pb-app").classList.add("below"); setCollapsed(false, true); return; }
-    setCollapsed(stored != null ? stored === "1" : mobile(), true);
+    const stored = () => { try { return localStorage.getItem("pb-collapsed-" + CFG.kind) === "1"; } catch { return false; } };
+    setCollapsed(mobile() ? true : stored(), true);
+    try { matchMedia("(max-width: 860px)").addEventListener("change", () => setCollapsed(mobile() ? true : stored(), true)); } catch {}
   }
   function mobile() { return matchMedia("(max-width: 860px)").matches; }
   function setCollapsed(v, silent) {
     S.collapsed = !!v;
     document.getElementById("pb-app").classList.toggle("collapsed", S.collapsed);
-    ui.toggle.innerHTML = mobile() ? I.chev : I.panel;
-    ui.toggle.classList.toggle("flip", mobile() && !S.collapsed);
-    ui.toggle.title = ui.toggle.ariaLabel = S.collapsed ? t("expand") : t("collapse");
-    if (!silent) try { localStorage.setItem("pb-collapsed-" + CFG.kind, S.collapsed ? "1" : "0"); } catch {}
+    ui.toggle.innerHTML = mobile() ? I.x : I.panel;
+    const lbl = mobile() ? t("close") : S.collapsed ? t("expand") : t("collapse");
+    ui.toggle.title = lbl; ui.toggle.setAttribute("aria-label", lbl);
+    ui.open.setAttribute("aria-expanded", String(!S.collapsed));
+    O.onPanel && O.onPanel(!S.collapsed, mobile());
+    if (!silent && !mobile()) try { localStorage.setItem("pb-collapsed-" + CFG.kind, S.collapsed ? "1" : "0"); } catch {}
     if (!S.collapsed && S.sel) setTimeout(() => { const el = ui.list.querySelector(`[data-id="${CSS.escape(S.sel)}"]`); el && el.scrollIntoView({ block: "nearest" }); }, 60);
   }
   function autosize() { ui.ta.style.height = "0px"; ui.ta.style.height = Math.max(20, Math.min(160, ui.ta.scrollHeight - 10)) + "px"; }
   function renderTabs() {
     const nOpen = S.patches.filter(isOpen).length;
-    if (ui.sum) { ui.sum.textContent = nOpen ? nOpen + " " + t("openN") : ""; ui.railCount.textContent = nOpen ? String(nOpen) : ""; ui.railCount.hidden = !nOpen; }
+    for (const el of [ui.railCount, ui.openCount]) { el.textContent = nOpen ? String(nOpen) : ""; el.hidden = !nOpen; }
     for (const f of ["open", "done"]) {
       ui.tabs[f].setAttribute("aria-pressed", String(S.filter === f));
       ui.tabs[f].querySelector(".pb-count").textContent = S.patches.filter((p) => inTab(p, f) && inScope(p)).length;
@@ -766,7 +852,8 @@ const PB = (() => {
   function renderFoot() {
     if (!ui.note) return;
     const msg = S.readonly ? t("readonly") : !S.live ? t("local") : "";
-    ui.note.hidden = !msg; ui.note.textContent = msg;
+    ui.note.hidden = !msg; ui.note.textContent = msg; ui.note.classList.toggle("ro", S.readonly);
+    if (ui.fab) ui.fab.hidden = S.readonly;
     ui.compose.hidden = S.readonly; ui.handoff.hidden = S.readonly;
     const local = !S.live;
     ui.handoffLabel.textContent = local ? t("handoffLocal") : t("handoff");
@@ -774,6 +861,7 @@ const PB = (() => {
   }
   function renderList() {
     if (!ui.list) return;
+    if (S.editing) { S.stale = true; renderTabs(); return; }
     renderTabs();
     const items = visible().sort((a, b) => S.filter === "open" ? (a.n || 0) - (b.n || 0) : (b.doneAt || b.created || 0) - (a.doneAt || a.created || 0));
     ui.list.textContent = "";
@@ -786,7 +874,7 @@ const PB = (() => {
     };
     if (!items.length) {
       ui.list.append(h("div", { class: "pb-empty" }, h("span", { html: S.filter === "open" ? I.comment : I.check }),
-        S.filter === "open" ? (O.timeBased ? t("emptyOpenTime") : t("emptyOpen")) : t("emptyDone")));
+        S.filter === "open" ? (S.patches.some((p) => !isOpen(p) && inScope(p)) ? t("allDone") : O.timeBased ? t("emptyOpenTime") : t("emptyOpen")) : t("emptyDone")));
       const l = scopeLink(); if (l) ui.list.append(l);
       return;
     }
@@ -802,8 +890,12 @@ const PB = (() => {
     meta.append(h("span", { class: "pb-where", text: p.label || t("general") }));
     const text = h("div", { class: "pb-text", text: p.text || "", title: S.readonly ? null : t("edit") });
     if (!S.readonly) text.addEventListener("dblclick", (e) => {
-      e.stopPropagation(); text.contentEditable = "true"; text.focus();
-      const end = () => { text.contentEditable = "false"; const v = text.textContent.trim(); if (v && v !== p.text) patchUpdate(p, { text: v }); else text.textContent = p.text; };
+      e.stopPropagation(); if (S.editing) return; S.editing = true; text.contentEditable = "true"; text.focus();
+      const end = () => {
+        text.contentEditable = "false"; S.editing = false;
+        const v = text.textContent.trim(); if (v && v !== p.text) patchUpdate(p, { text: v }); else text.textContent = p.text;
+        if (S.stale) { S.stale = false; renderList(); }
+      };
       text.addEventListener("blur", end, { once: true });
       text.addEventListener("keydown", (k) => { if (k.key === "Enter" && !k.shiftKey) { k.preventDefault(); text.blur(); } if (k.key === "Escape") { text.textContent = p.text; text.blur(); } });
     });
@@ -832,9 +924,10 @@ const PB = (() => {
     el.addEventListener("keydown", (e) => { if (e.key === "Enter" && e.target === el) select(p.id, true); });
     return el;
   }
-  function select(id, jump) {
+  // jump: go to the place of the patch. reveal: also show it in the panel.
+  function select(id, jump, reveal) {
     S.sel = id;
-    if (S.collapsed && !jump) setCollapsed(false, true);
+    if (S.collapsed && (!jump || reveal)) setCollapsed(false, true);
     const p = S.patches.find((x) => x.id === id);
     if (p) {
       const want = isOpen(p) ? "open" : "done";
@@ -844,7 +937,9 @@ const PB = (() => {
     const el = ui.list.querySelector(`[data-id="${CSS.escape(id)}"]`);
     if (el) el.scrollIntoView({ block: "nearest", behavior: "smooth" });
     if (jump && p && O.focus) O.focus(p);
+    if (jump && !reveal && mobile() && !S.collapsed) setCollapsed(true, true); // on phones the panel gets out of the way
   }
+  function focusComposer() { if (S.collapsed && !mobile()) setCollapsed(false, true); if (ui.ta) ui.ta.focus({ preventScroll: true }); }
 
   // ---------- helpers ----------
   let toastTimer;
@@ -853,8 +948,9 @@ const PB = (() => {
     el.textContent = msg; el.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => (el.hidden = true), ms || 2200);
   }
   function lightbox(src) {
-    const lb = h("div", { class: "pb-lightbox", onclick: () => lb.remove() }, h("img", { src, alt: "" }));
-    const esc = (e) => { if (e.key === "Escape") { lb.remove(); document.removeEventListener("keydown", esc, true); } };
+    const close = () => { lb.remove(); document.removeEventListener("keydown", esc, true); };
+    const esc = (e) => { if (e.key === "Escape") { e.stopPropagation(); close(); } };
+    const lb = h("div", { class: "pb-lightbox", onclick: close }, h("img", { src, alt: "" }));
     document.addEventListener("keydown", esc, true); document.body.append(lb);
   }
   function copy(text) {
@@ -932,8 +1028,11 @@ const PB = (() => {
       if (O.onKey && O.onKey(e)) { e.preventDefault(); return; }
       if (O.modes && (e.key === "c" || e.key === "C")) { e.preventDefault(); setMode(S.mode === "comment" ? "browse" : "comment"); }
       else if (O.modes && (e.key === "v" || e.key === "V")) { e.preventDefault(); setMode("browse"); }
+      else if (e.key === "Escape" && mobile() && !S.collapsed) { setCollapsed(true); }
       else if (e.key === "Escape" && S.draft.anchor) { clearDraft(); }
     });
+    new MutationObserver(retheme).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme", "class"] });
+    try { matchMedia("(prefers-color-scheme: dark)").addEventListener("change", retheme); } catch {}
     if (CFG.version) document.querySelectorAll("[data-pb-version]").forEach((el) => (el.textContent = CFG.version));
     connect();
   }
@@ -950,6 +1049,7 @@ const PB = (() => {
       h("button", { class: "pb-ibtn", "aria-label": t("zoomIn"), html: I.plus, onclick: () => zoomCenter(1.25) }));
     zoomOut.addEventListener("click", fit);
     inner.append(img, layer); host.append(inner, zoomBox);
+    zoomBox.addEventListener("pointerdown", (e) => e.stopPropagation()); // zoom buttons never place a pin
     let z = 1, tx = 0, ty = 0, W = 0, H = 0, fitted = false, space = false;
 
     function apply() { inner.style.transform = `translate(${tx}px,${ty}px) scale(${z})`; layer.style.setProperty("--iz", 1 / z); zoomOut.textContent = Math.round(z * 100) + "%"; }
@@ -997,25 +1097,47 @@ const PB = (() => {
       const d = opts.draft && opts.draft();
       if (d) add(d, 0, "draft", false, null);
     }
-    let drag = null;
+    let drag = null, pinch = null, rAF = 0;
+    const pts = new Map();
+    // pan and pinch can fire far more often than the screen refreshes: one transform per frame
+    const applySoon = () => { if (!rAF) rAF = requestAnimationFrame(() => { rAF = 0; apply(); }); };
+    const two = () => { const [a, b] = [...pts.values()]; const r = host.getBoundingClientRect(); return { d: Math.hypot(a.x - b.x, a.y - b.y) || 1, cx: (a.x + b.x) / 2 - r.left, cy: (a.y + b.y) / 2 - r.top }; };
     host.addEventListener("pointerdown", (e) => {
       if (e.button > 1 || !W) return;
-      host.setPointerCapture(e.pointerId);
+      try { host.setPointerCapture(e.pointerId); } catch {}
+      pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (pts.size === 2) {
+        // second finger: zoom and move with two fingers, whatever the mode; an unfinished area is dropped
+        if (drag && drag.rect) { S.draft.anchor = null; draw(); }
+        drag = null; host.classList.remove("panning");
+        const g = two(); pinch = { d: g.d, cx: g.cx, cy: g.cy, z, tx, ty };
+        return;
+      }
+      if (pts.size > 2 || pinch) return;
       const pan = opts.mode() !== "comment" || space || e.button === 1;
-      drag = { pan, x: e.clientX, y: e.clientY, tx, ty, c0: coord(e), moved: false };
+      drag = { id: e.pointerId, pan, x: e.clientX, y: e.clientY, tx, ty, c0: coord(e), moved: false };
       if (pan) host.classList.add("panning");
     });
     host.addEventListener("pointermove", (e) => {
-      if (!drag) return;
+      if (pts.has(e.pointerId)) pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (pinch && pts.size >= 2) {
+        const g = two(), nz = clamp(pinch.z * (g.d / pinch.d), 0.05, 10);
+        tx = g.cx - (pinch.cx - pinch.tx) * (nz / pinch.z); ty = g.cy - (pinch.cy - pinch.ty) * (nz / pinch.z); z = nz; fitted = false; applySoon();
+        return;
+      }
+      if (!drag || e.pointerId !== drag.id) return;
       const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
       if (Math.hypot(dx, dy) > 5) drag.moved = true;
-      if (drag.pan) { tx = drag.tx + dx; ty = drag.ty + dy; fitted = false; apply(); }
+      if (drag.pan) { tx = drag.tx + dx; ty = drag.ty + dy; fitted = false; applySoon(); }
       else if (drag.moved) { const c = coord(e); drag.rect = { x: Math.min(c.x, drag.c0.x), y: Math.min(c.y, drag.c0.y), w: Math.abs(c.x - drag.c0.x), h: Math.abs(c.y - drag.c0.y) }; opts.onDraft(drag.rect, true); }
     });
-    const end = () => {
-      if (!drag) return; host.classList.remove("panning");
-      if (!drag.pan) { if (drag.rect && drag.rect.w > 0.004 && drag.rect.h > 0.004) opts.onDraft(drag.rect, false); else if (!drag.moved) opts.onDraft(drag.c0, false); }
-      drag = null;
+    const end = (e) => {
+      pts.delete(e.pointerId);
+      if (pinch) { if (pts.size === 0) pinch = null; return; } // lifting the fingers after a pinch places nothing
+      if (!drag || e.pointerId !== drag.id) return; host.classList.remove("panning");
+      const d = drag; drag = null;
+      if (e.type !== "pointerup") { if (d.rect) { S.draft.anchor = null; draw(); } return; }
+      if (!d.pan) { if (d.rect && d.rect.w > 0.004 && d.rect.h > 0.004) opts.onDraft(d.rect, false); else if (!d.moved) opts.onDraft(d.c0, false); else if (d.rect) { S.draft.anchor = null; draw(); } }
     };
     host.addEventListener("pointerup", end); host.addEventListener("pointercancel", end);
     host.addEventListener("wheel", (e) => {
@@ -1026,6 +1148,7 @@ const PB = (() => {
     }, { passive: false });
     window.addEventListener("keydown", (e) => { if (e.code === "Space" && !keyTarget(e)) { space = true; } });
     window.addEventListener("keyup", (e) => { if (e.code === "Space") space = false; });
+    window.addEventListener("blur", () => { space = false; });
     new ResizeObserver(() => { if (fitted) fit(); }).observe(host);
     const setMode = (m) => { host.classList.toggle("comment", m === "comment"); host.classList.toggle("browse", m !== "comment"); };
     setMode(opts.mode());
@@ -1033,18 +1156,24 @@ const PB = (() => {
   }
 
   // ---------- timeline (scene bar, waveform, dots, press-and-hold zoom, drag = range) ----------
+  // Two layers: a canvas that is redrawn only when something changes (view, patches, theme),
+  // and a playhead element moved with a transform, so playback costs no canvas work at all.
   function Timeline(host, opts) {
     host.classList.add("tl");
-    const cv = h("canvas"); const tip = h("div", { class: "tl-tip", hidden: true });
-    host.append(cv, tip);
-    const ctx = cv.getContext("2d");
-    let v0 = 0, v1 = 0, target = null, hover = null, range = null, pd = null, raf = 0;
+    const cv = h("canvas"), cvp = h("canvas"), ph = h("div", { class: "tl-ph", hidden: true }), tip = h("div", { class: "tl-tip", hidden: true });
+    host.append(cv, cvp, ph, tip);
+    const ctx = cv.getContext("2d"), ctxp = cvp.getContext("2d");
+    let v0 = 0, v1 = 0, target = null, range = null, pd = null, raf = 0, lastPx = null, wave = false, R = { width: 0, height: 0 };
     const DOT = 20, BAR_Y = 28, PAD = 10;
     const dur = () => opts.duration() || 0;
-    function css(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
-    function size() { const r = host.getBoundingClientRect(); const d = devicePixelRatio || 1; cv.width = Math.round(r.width * d); cv.height = Math.round(r.height * d); ctx.setTransform(d, 0, 0, d, 0, 0); return r; }
-    let R = size();
-    new ResizeObserver(() => { R = size(); draw(); }).observe(host);
+    function size() {
+      const r = host.getBoundingClientRect(), d = Math.min(3, devicePixelRatio || 1);
+      for (const c of [cv, cvp]) { c.width = Math.round(r.width * d); c.height = Math.round(r.height * d); }
+      ctx.setTransform(d, 0, 0, d, 0, 0); ctxp.setTransform(d, 0, 0, d, 0, 0);
+      R = { width: r.width, height: r.height };
+    }
+    size();
+    new ResizeObserver(() => { size(); draw(); }).observe(host);
     const IW = () => Math.max(1, R.width - PAD * 2);
     const tToX = (tt) => PAD + ((tt - v0) / Math.max(1e-6, v1 - v0)) * IW();
     const xToT = (x) => clamp(v0 + ((x - PAD) / IW()) * (v1 - v0), 0, dur());
@@ -1054,128 +1183,137 @@ const PB = (() => {
       cancelAnimationFrame(raf);
       const step = () => {
         if (!target) return;
-        v0 += (target[0] - v0) * 0.28; v1 += (target[1] - v1) * 0.28;
+        v0 += (target[0] - v0) * 0.3; v1 += (target[1] - v1) * 0.3;
         if (Math.abs(target[0] - v0) + Math.abs(target[1] - v1) < 0.002) { v0 = target[0]; v1 = target[1]; target = null; }
         draw(); if (target) raf = requestAnimationFrame(step);
       };
       raf = requestAnimationFrame(step);
     }
-    function setView(a, b, now) { if (now) { v0 = a; v1 = b; target = null; draw(); } else { target = [a, b]; animate(); } }
+    function setView(a, b, now) { if (now) { cancelAnimationFrame(raf); v0 = a; v1 = b; target = null; draw(); } else { target = [a, b]; animate(); } }
     function reset(now) { setView(0, dur(), now); }
+    const zoomed = () => !!target || (dur() && v1 - v0 < dur() * 0.99);
+    function roundRect(c, x, y, w, hh, r) { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + hh, r); c.arcTo(x + w, y + hh, x, y + hh, r); c.arcTo(x, y + hh, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
     function draw() {
-      const W = R.width, Hh = R.height, D = dur();
-      ctx.clearRect(0, 0, W, Hh);
-      if (!D) return;
+      const W = R.width, Hh = R.height, D = dur(), P = pal();
+      ctx.clearRect(0, 0, W, Hh); ctxp.clearRect(0, 0, W, Hh);
+      lastPx = null;
+      if (!D || !W) { ph.hidden = true; return; }
       if (v1 <= v0) { v0 = 0; v1 = D; }
-      const ink = css("--ink"), muted = css("--muted"), line = css("--line"), lineS = css("--line-strong"), acc = css("--accent"), accSoft = css("--accent-soft"), panel = css("--panel"), work = css("--work"), donePin = css("--done-pin");
-      const barH = Hh - BAR_Y - 4;
-      // chapters
+      const barH = Hh - BAR_Y - 4, pins = opts.pins();
       const ch = opts.chapters ? opts.chapters() : [];
-      ctx.save(); roundRect(PAD, BAR_Y, W - PAD * 2, barH, 7); ctx.clip();
-      ctx.fillStyle = line; ctx.fillRect(PAD, BAR_Y, W - PAD * 2, barH);
+      ctx.save(); roundRect(ctx, PAD, BAR_Y, W - PAD * 2, barH, 10); ctx.clip();
+      ctx.fillStyle = P.line; ctx.fillRect(PAD, BAR_Y, W - PAD * 2, barH);
+      ctx.font = "11px " + P.font;
       ch.forEach(([name, s], i) => {
         const e = i + 1 < ch.length ? ch[i + 1][1] : D;
         const x0 = tToX(s), x1 = tToX(e);
         if (x1 < 0 || x0 > W) return;
-        if (i % 2) { ctx.fillStyle = line; ctx.fillRect(x0, BAR_Y, x1 - x0, barH); }
-        ctx.fillStyle = lineS; ctx.fillRect(x0, BAR_Y, 1, barH);
-        if (x1 - x0 > 46) { ctx.fillStyle = muted; ctx.font = "11px " + css("--font"); ctx.save(); ctx.beginPath(); ctx.rect(x0 + 6, BAR_Y, x1 - x0 - 12, barH); ctx.clip(); ctx.fillText(name, Math.max(x0, 0) + 7, BAR_Y + 15); ctx.restore(); }
+        if (i % 2) { ctx.fillStyle = P.line; ctx.fillRect(x0, BAR_Y, x1 - x0, barH); }
+        ctx.fillStyle = P.lineS; ctx.fillRect(x0, BAR_Y, 1, barH);
+        if (x1 - x0 > 46) { ctx.fillStyle = P.muted; ctx.save(); ctx.beginPath(); ctx.rect(x0 + 6, BAR_Y, x1 - x0 - 12, barH); ctx.clip(); ctx.fillText(name, Math.max(x0, PAD) + 7, BAR_Y + 15); ctx.restore(); }
       });
-      // waveform
+      // waveform: muted on the base layer, accent on the played layer (clipped at the playhead in pos())
       const peaks = opts.peaks && opts.peaks();
-      if (peaks && peaks.length) {
+      wave = !!(peaks && peaks.length);
+      if (wave) {
         const mid = BAR_Y + barH / 2 + (ch.length ? 6 : 0), amp = (barH / 2 - (ch.length ? 10 : 4));
-        const played = opts.time();
+        ctxp.save(); roundRect(ctxp, PAD, BAR_Y, W - PAD * 2, barH, 10); ctxp.clip();
+        ctx.fillStyle = P.muted; ctx.globalAlpha = 0.55; ctxp.fillStyle = P.acc; ctxp.globalAlpha = 0.9;
         for (let x = PAD; x < W - PAD; x += 2) {
           const tt = xToT(x), i = Math.floor((tt / D) * peaks.length), pk = peaks[clamp(i, 0, peaks.length - 1)] || 0;
           const hh = Math.max(1, pk * amp);
-          ctx.fillStyle = tt <= played ? acc : muted; ctx.globalAlpha = tt <= played ? 0.85 : 0.55;
-          ctx.fillRect(x, mid - hh, 1.4, hh * 2);
+          ctx.fillRect(x, mid - hh, 1.4, hh * 2); ctxp.fillRect(x, mid - hh, 1.4, hh * 2);
         }
-        ctx.globalAlpha = 1;
+        ctx.globalAlpha = 1; ctxp.restore();
       }
-      // ranges of patches
-      for (const p of opts.pins()) {
+      for (const p of pins) {
         const a = p.anchor || {}; if (a.t2 == null) continue;
-        ctx.fillStyle = p.status === "done" ? line : accSoft; ctx.fillRect(tToX(a.t), BAR_Y, tToX(a.t2) - tToX(a.t), barH);
+        ctx.fillStyle = p.status === "done" ? P.line : P.accSoft; ctx.fillRect(tToX(a.t), BAR_Y, tToX(a.t2) - tToX(a.t), barH);
       }
-      if (range) { ctx.fillStyle = accSoft; ctx.fillRect(tToX(range[0]), BAR_Y, tToX(range[1]) - tToX(range[0]), barH); ctx.fillStyle = acc; ctx.fillRect(tToX(range[0]), BAR_Y, 1.5, barH); ctx.fillRect(tToX(range[1]) - 1.5, BAR_Y, 1.5, barH); }
+      const dr = opts.draft && opts.draft();
+      const rg = range || (dr && dr.t2 != null ? [dr.t, dr.t2] : null);
+      if (rg) { ctx.fillStyle = P.accSoft; ctx.fillRect(tToX(rg[0]), BAR_Y, tToX(rg[1]) - tToX(rg[0]), barH); ctx.fillStyle = P.acc; ctx.fillRect(tToX(rg[0]), BAR_Y, 1.5, barH); ctx.fillRect(tToX(rg[1]) - 1.5, BAR_Y, 1.5, barH); }
       ctx.restore();
-      // zoom ticks
       if (v1 - v0 < D * 0.99) {
         const span = v1 - v0, step = [0.1, 0.25, 0.5, 1, 2, 5, 10, 30, 60].find((s) => span / s < 14) || 120;
-        ctx.fillStyle = muted; ctx.font = "10px " + css("--mono");
-        for (let s = Math.ceil(v0 / step) * step; s <= v1; s += step) { const x = tToX(s); ctx.fillRect(x, Hh - 8, 1, 6); }
+        ctx.fillStyle = P.muted;
+        for (let s = Math.ceil(v0 / step) * step; s <= v1; s += step) ctx.fillRect(tToX(s), Hh - 8, 1, 6);
       }
-      // playhead
-      const px = tToX(opts.time());
-      ctx.fillStyle = ink; ctx.fillRect(px - 1, BAR_Y - 4, 2, barH + 8);
-      ctx.beginPath(); ctx.arc(px, BAR_Y - 4, 4, 0, Math.PI * 2); ctx.fill();
-      // dots
       const sel = S.sel;
-      for (const p of opts.pins()) {
+      ctx.font = "600 9.5px " + P.font; ctx.textAlign = "center";
+      for (const p of pins) {
         const a = p.anchor || {}; if (a.t == null) continue;
         const x = tToX(a.t); if (x < -10 || x > W + 10) continue;
-        ctx.fillStyle = p.status === "done" ? donePin : p.status === "working" ? work : acc;
+        ctx.fillStyle = p.status === "done" ? P.ok : p.status === "working" ? P.work : P.acc;
         ctx.beginPath(); ctx.arc(x, 10, p.id === sel ? 9.5 : 8, 0, Math.PI * 2); ctx.fill();
-        if (p.id === sel) { ctx.strokeStyle = panel; ctx.lineWidth = 2; ctx.stroke(); }
-        ctx.fillStyle = css("--on-accent"); ctx.font = "600 9.5px " + css("--font"); ctx.textAlign = "center"; ctx.fillText(String(p.n || ""), x, 13.5); ctx.textAlign = "start";
+        if (p.id === sel) { ctx.strokeStyle = P.panel; ctx.lineWidth = 2; ctx.stroke(); }
+        ctx.fillStyle = p.status === "done" ? "#fff" : P.onAcc; ctx.fillText(p.status === "done" ? "✓" : String(p.n || ""), x, 13.5);
       }
-      const d = opts.draft && opts.draft();
-      if (d && d.t != null) { const x = tToX(d.t); ctx.strokeStyle = acc; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x, 10, 6, 0, Math.PI * 2); ctx.stroke(); }
-      if (hover != null && !pd) { tip.hidden = false; tip.style.left = clamp(hover, 24, W - 24) + "px"; tip.textContent = fmtTime(xToT(hover), v1 - v0 < 30); }
-      else if (!pd || pd.mode === "pending") tip.hidden = true;
+      ctx.textAlign = "start";
+      if (dr && dr.t != null) { const x = tToX(dr.t); ctx.strokeStyle = P.acc; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x, 10, 6, 0, Math.PI * 2); ctx.stroke(); }
+      pos();
     }
-    function roundRect(x, y, w, hh, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + hh, r); ctx.arcTo(x + w, y + hh, x, y + hh, r); ctx.arcTo(x, y + hh, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+    // Move the playhead. Called on every frame during playback: one transform, no canvas work, no layout reads.
+    function pos() {
+      const D = dur(); if (!D || !R.width) return;
+      const x = tToX(opts.time()), px = Math.round(x * 4) / 4;
+      if (px === lastPx) return; lastPx = px;
+      const out = px < PAD - 2 || px > R.width - PAD + 2;
+      if (ph.hidden !== out) ph.hidden = out;
+      ph.style.transform = "translate3d(" + px + "px,0,0)";
+      if (wave) cvp.style.clipPath = "inset(0 " + Math.max(0, R.width - px) + "px 0 0)";
+    }
     function hitDot(x, y) {
       if (y > DOT + 4) return null;
-      let best = null, bd = 10;
+      let best = null, bd = 12;
       for (const p of opts.pins()) { const a = p.anchor || {}; if (a.t == null) continue; const d = Math.abs(tToX(a.t) - x); if (d < bd) { bd = d; best = p; } }
       return best;
     }
-    const lx = (e) => e.clientX - host.getBoundingClientRect().left;
-    const ly = (e) => e.clientY - host.getBoundingClientRect().top;
+    const showTip = (x, tt, dec) => { tip.hidden = false; tip.style.left = clamp(x, 26, R.width - 26) + "px"; tip.textContent = fmtTime(tt, dec); };
+    let box = null;
+    const lx = (e) => e.clientX - box.left, ly = (e) => e.clientY - box.top;
     host.addEventListener("pointerdown", (e) => {
-      if (!dur() || e.button > 0) return;
+      if (!dur() || e.button > 0 || pd) return;
+      box = host.getBoundingClientRect();
       const x = lx(e), dot = hitDot(x, ly(e));
-      if (dot) { select(dot.id, true); return; }
-      host.setPointerCapture(e.pointerId);
+      if (dot) { select(dot.id, true, true); return; }
+      try { host.setPointerCapture(e.pointerId); } catch {}
       const t0 = xToT(x);
-      pd = { x, y: ly(e), t0, touch: e.pointerType !== "mouse", mode: "pending", timer: setTimeout(() => {
+      pd = { id: e.pointerId, x, t0, touch: e.pointerType !== "mouse", mode: "pending", timer: setTimeout(() => {
         if (!pd || pd.mode !== "pending") return;
         pd.mode = "zoom";
-        const span = Math.max(Math.min(dur(), 4), dur() * 0.08), c = t0;
-        const a = clamp(c - span * ((x - PAD) / IW()), 0, Math.max(0, dur() - span));
-        host.classList.add("tl-big"); setView(a, a + span); opts.seek(t0); opts.onScrubStart && opts.onScrubStart();
+        const span = Math.max(Math.min(dur(), 4), dur() * 0.08);
+        const a = clamp(t0 - span * ((x - PAD) / IW()), 0, Math.max(0, dur() - span));
+        host.classList.add("tl-big"); setView(a, a + span); opts.onScrubStart && opts.onScrubStart(); opts.seek(t0); showTip(x, t0, true);
       }, 320) };
     });
     host.addEventListener("pointermove", (e) => {
-      const x = lx(e); hover = x;
-      if (pd) {
-        // a tap that wobbles a few pixels stays a tap; touch needs a clearer drag to start a range
-        if (pd.mode === "pending" && Math.abs(x - pd.x) > (pd.touch ? 16 : 6) && opts.onRange) { clearTimeout(pd.timer); pd.mode = "range"; }
-        if (pd.mode === "zoom") { const tt = xToTT(x); opts.seek(tt); tip.hidden = false; tip.style.left = clamp(x, 24, R.width - 24) + "px"; tip.textContent = fmtTime(tt, true); }
-        if (pd.mode === "range") { const t1 = xToT(x); range = [Math.min(pd.t0, t1), Math.max(pd.t0, t1)]; }
+      if (!pd) { if (e.pointerType === "mouse" && dur()) { box = host.getBoundingClientRect(); const x = lx(e); showTip(x, xToT(x), v1 - v0 < 30); } return; }
+      if (e.pointerId !== pd.id) return;
+      const x = lx(e);
+      // a tap that wobbles a few pixels stays a tap; touch needs a clearer drag to start a range
+      if (pd.mode === "pending" && Math.abs(x - pd.x) > (pd.touch ? 16 : 6) && opts.onRange) { clearTimeout(pd.timer); pd.mode = "range"; }
+      if (pd.mode === "zoom") { const tt = xToTT(x); opts.seek(tt); showTip(x, tt, true); }
+      else if (pd.mode === "range") { const t1 = xToT(x); range = [Math.min(pd.t0, t1), Math.max(pd.t0, t1)]; showTip(x, t1, true); draw(); }
+    });
+    host.addEventListener("pointerleave", () => { if (!pd) tip.hidden = true; });
+    const up = (e) => {
+      if (!pd || (e && e.pointerId !== pd.id)) return; clearTimeout(pd.timer);
+      const m = pd.mode, t0 = pd.t0, rg = range; pd = null; range = null; tip.hidden = true;
+      if (m === "pending") opts.seek(t0);
+      else if (m === "zoom") { host.classList.remove("tl-big"); reset(); opts.onScrubEnd && opts.onScrubEnd(); }
+      else if (m === "range" && rg) {
+        const min = Math.max(0.3, (v1 - v0) * 0.02);
+        if (rg[1] - rg[0] >= min) opts.onRange(rg[0], rg[1]); else opts.seek(t0);
       }
       draw();
-    });
-    host.addEventListener("pointerleave", () => { hover = null; draw(); });
-    const up = () => {
-      if (!pd) return; clearTimeout(pd.timer);
-      if (pd.mode === "pending") opts.seek(pd.t0);
-      else if (pd.mode === "zoom") { host.classList.remove("tl-big"); reset(); }
-      else if (pd.mode === "range" && range) {
-        const min = Math.max(0.3, (v1 - v0) * 0.02);
-        if (range[1] - range[0] >= min) opts.onRange(range[0], range[1]); else opts.seek(pd.t0);
-      }
-      range = null; pd = null; tip.hidden = true; draw();
     };
-    host.addEventListener("pointerup", up); host.addEventListener("pointercancel", up);
-    return { draw, reset };
+    host.addEventListener("pointerup", up); host.addEventListener("pointercancel", up); host.addEventListener("lostpointercapture", up);
+    return { draw, pos, reset, zoomed };
   }
 
   return {
-    boot, refresh: () => changed(), quote, setCollapsed, draggable, movePatch, canDrag, t, I, h, $, S, pin, blobUrl, fmtTime, clamp, toast, lightbox, setDraft, clearDraft, refreshChip, select, setMode,
+    boot, refresh: () => changed(), quote, setCollapsed, draggable, movePatch, canDrag, t, I, h, $, S, pin, blobUrl, fmtTime, clamp, toast, lightbox, setDraft, clearDraft, refreshChip, select, setMode, pal, focusComposer, mobile,
     modeToggle, visible, addBoard, attach, upload, keyTarget, handlePaste, ImageCanvas, Timeline, lang,
     get patches() { return S.patches; }, get boards() { return S.boards; },
   };
@@ -1337,7 +1475,9 @@ const PB = (() => {
     root.append(style, hl, hlTag, pinsBox);
     fdoc.documentElement.appendChild(host);
     const ours = (e) => e.composedPath && e.composedPath().includes(host);
-    const block = (e) => { if (S.mode === "comment" && !ours(e)) { e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); } };
+    // Touch events are only hidden from the site, never cancelled: cancelling touchend would swallow the tap's click
+    // (no pin on phones) and cancelling touchstart would stop scrolling.
+    const block = (e) => { if (S.mode === "comment" && !ours(e)) { if (!/^touch/.test(e.type)) e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); } };
     for (const ev of ["mousedown", "mouseup", "pointerdown", "pointerup", "dblclick", "submit", "auxclick", "contextmenu", "touchstart", "touchend"]) fdoc.addEventListener(ev, block, true);
     fdoc.addEventListener("click", (e) => { if (S.mode !== "comment" || ours(e)) return; block(e); place(e); }, true);
     fdoc.addEventListener("mousemove", (e) => { if (S.mode === "comment" && !ours(e)) highlight(e.target); }, true);

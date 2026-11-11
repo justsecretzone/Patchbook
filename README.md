@@ -56,7 +56,8 @@ Giving feedback on generated work in a chat is clumsy: "the second button in the
 - **Screenshots everywhere.** Paste, drop or attach images to any patch. On websites, apps and images you can also paste or drop a screenshot onto the page and pin patches on it.
 - **Nothing gets lost.** Patches stay on the page they were made on, and small pills show pins that are scrolled out of view.
 - **Claude works through them.** Patches show "Claude is on it" while it works, then move to Done with a one-line reply.
-- **The work gets the space.** A collapsible sidebar where you comment on a surface, a list under the player for audio and video, a bottom sheet on phones, one floating Comment button.
+- **The work gets the space.** Patches live in a glass panel that opens from the side: a collapsible panel on desktop, a drawer that slides in from the right on phones. Only the input stays docked, the list is never under it.
+- **Smooth playback.** During playback the video and audio pages only move the playhead; nothing is redrawn, and scrubbing never queues up seeks.
 - **Your language, your theme.** The page speaks the language you write to Claude in and follows Claude's light or dark setting.
 - **Temporary by design.** Once you approve the final version, Claude takes the review page offline.
 
