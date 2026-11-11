@@ -13,7 +13,8 @@ const CFG = {
   collection: "video_patches",       // one name per project
   lang: "auto",                      // set to the user's language, e.g. "de" or "en"
   strings: null,                     // other languages: { key: "translation", ... } for every UI string
-  src: "",                           // "/_blob/<id>" from the asset store (under 15 MB)
+  closed: {},                        // patches fixed in THIS version: { "<patch id>": "one line: what changed" }. The page marks them done itself.
+  src: "",                           // "media/review-v1.mp4", published next to this page in the same call (under 15 MB)
   title: "",                         // optional short name shown above the player
   duration: 0,                       // seconds, used until the file reports its own length
   fps: 25,                           // frame rate, used by , and . for single frames

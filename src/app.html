@@ -13,6 +13,7 @@ const CFG = {
   collection: "app_patches",         // one name per project, e.g. "acme_app_patches"
   lang: "auto",                      // set to the user's language, e.g. "de" or "en"
   strings: null,                     // other languages: { key: "translation", ... } for every UI string
+  closed: {},                        // patches fixed in THIS version: { "<patch id>": "one line: what changed" }. The page marks them done itself.
   // Screens: a live HTML build (files next to this page) or an image of a native screen.
   screens: [
     { name: "Home", src: "app/index.html" },

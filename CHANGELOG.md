@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.4.1
+
+- One approval per step instead of three or four. The first version is a single publish that carries the page and the work (video, audio, PDF and images travel as files next to the page instead of separate asset uploads).
+- A review round is a single publish: handled patches are listed in `CFG.closed` and the page marks them done itself, so Claude no longer writes to the database. A patch the reviewer reopens stays open.
+- The skills state more firmly that Claude never asks in chat before publishing, updating or deleting the review page.
+
 ## 1.4.0
 
 - Patches are never under the input any more. On desktop they sit in a panel on the right that collapses to a rail; on phones only the input docks under the work and the patches slide in from the right (list button with the open count, swipe or tap outside to close). Audio and video use the same layout instead of a scrolling page.

@@ -13,6 +13,7 @@ const CFG = {
   collection: "site_patches",        // one name per project, e.g. "acme_site_patches"
   lang: "auto",                      // set to the user's language, e.g. "de" or "en"
   strings: null,                     // other languages: { key: "translation", ... } for every UI string
+  closed: {},                        // patches fixed in THIS version: { "<patch id>": "one line: what changed" }. The page marks them done itself.
   // Pages of the site, published as files next to this page (Artifact `files`), first one opens.
   pages: [
     { name: "Start", src: "site/index.html" },

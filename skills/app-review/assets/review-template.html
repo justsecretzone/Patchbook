@@ -430,6 +430,7 @@ const CFG = {
   collection: "app_patches",         // one name per project, e.g. "acme_app_patches"
   lang: "auto",                      // set to the user's language, e.g. "de" or "en"
   strings: null,                     // other languages: { key: "translation", ... } for every UI string
+  closed: {},                        // patches fixed in THIS version: { "<patch id>": "one line: what changed" }. The page marks them done itself.
   // Screens: a live HTML build (files next to this page) or an image of a native screen.
   screens: [
     { name: "Home", src: "app/index.html" },
@@ -585,7 +586,7 @@ const PB = (() => {
     try { S.me = user ? await user.id() : null; } catch { S.me = null; }
     try { if (user && (await user.can("data.write")) === false) S.readonly = true; } catch {}
     col = db.collection(CFG.collection);
-    subscribe(col, (docs) => { S.patches = docs; resolveProfiles(); changed(); });
+    subscribe(col, (docs) => { S.patches = docs; applyClosed(); resolveProfiles(); changed(); });
     if (O.boards) {
       bcol = db.collection(CFG.collection + "_boards");
       subscribe(bcol, (docs) => { S.boards = docs.sort((a, b) => a.created - b.created); O.onBoards && O.onBoards(); });
@@ -603,7 +604,22 @@ const PB = (() => {
   function goLocal() {
     S.live = false;
     try { const d = JSON.parse(localStorage.getItem(LKEY) || "null"); if (d) { S.patches = d.patches || []; S.boards = d.boards || []; O.onBoards && O.onBoards(); } } catch {}
-    renderFoot(); changed();
+    applyClosed(); renderFoot(); changed();
+  }
+  // The page closes handled patches itself: Claude lists them in CFG.closed ({ "<patch id>": "what changed" }, or "#<n>")
+  // when it publishes a version. That way a review round needs one publish and no separate database writes.
+  // closedIn remembers the version, so a patch the reviewer reopens stays open.
+  const closing = new Set();
+  function applyClosed() {
+    const C = CFG.closed, ver = CFG.version || "v1";
+    if (!C || typeof C !== "object" || S.readonly) return;
+    for (const p of S.patches) {
+      const reply = C[p.id] != null ? C[p.id] : C["#" + p.n];
+      if (reply == null || p.closedIn === ver || closing.has(p.id)) continue;
+      const f = { status: "done", reply: String(reply), doneAt: Date.now(), closedIn: ver };
+      if (col) { closing.add(p.id); col.doc(p.id).update(f).catch(() => closing.delete(p.id)); }
+      else Object.assign(p, f);
+    }
   }
   function saveLocal() {
     if (S.live) return;

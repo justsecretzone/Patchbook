@@ -22,7 +22,8 @@ const CFG = {
   collection: "pdf_patches",         // one name per project
   lang: "auto",                      // set to the user's language, e.g. "de" or "en"
   strings: null,                     // other languages: { key: "translation", ... } for every UI string
-  src: "",                           // "/_blob/<id>" from the asset store, or "doc.pdf" published next to this page
+  closed: {},                        // patches fixed in THIS version: { "<patch id>": "one line: what changed" }. The page marks them done itself.
+  src: "",                           // "media/doc-v1.pdf", published next to this page in the same call
 };
 /* ================================================================================== */
 </script>

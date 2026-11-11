@@ -106,8 +106,8 @@ Skills are available on ChatGPT Business, Enterprise and Edu: **Plugins → Skil
 1. You ask Claude for a landing page. It builds the site and publishes the review page with the site embedded.
 2. You tap **Comment**, click the headline, write "shorter, two lines max", paste a reference screenshot, press Enter. Repeat.
 3. You tell Claude **"Work through the patches"** (or "Patches abarbeiten").
-4. Claude reads the open patches, looks at every screenshot, changes the site, publishes v2 and closes each patch with a note.
-5. When you approve the final version, Claude takes the review page offline after you confirm.
+4. Claude reads the open patches, looks at every screenshot, changes the site and publishes v2 in one step. The page closes each handled patch with a note on what changed.
+5. When you approve the final version, Claude takes the review page offline. It never asks in chat first; at most the app shows its own confirmation.
 
 ## Data
 
@@ -122,7 +122,7 @@ Each patch is one document in the review page's database:
   label: "Start · Button “Book now” · Mobile",
   shots: ["<assetId>"],                   // attached screenshots
   version: "v2", kind: "website", created: 1761400000000, author: "<user id>",
-  reply: "Button now #1d2a2c, hover lighter", doneAt: 1761400500000
+  reply: "Button now #1d2a2c, hover lighter", doneAt: 1761400500000, closedIn: "v2"
 }
 ```
 
